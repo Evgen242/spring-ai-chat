@@ -1,0 +1,27 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Build
+target/
+*.log
+*.tar.gz
+*.tar
+
+# Environment
+.env
+application-local.yml
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+OllamaSetup.exe
+request.json

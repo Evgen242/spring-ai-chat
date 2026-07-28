@@ -1,25 +1,29 @@
-# Spring AI Chat Application
+# 🚀 Spring AI Chat Application
 
-Spring Boot приложение с интеграцией LLM через Spring AI.
+> Spring Boot приложение с интеграцией LLM через Spring AI
 
----
-
-## О проекте
-
-REST API приложение для чата с использованием **Spring AI** и **Ollama**.
-Выполнено в рамках практического задания по специализации Spring AI.
-
-**Основные возможности:**
-- Интеграция LLM в Spring Boot
-- Работа с ChatClient
-- Промпт-инжиниринг (PromptTemplate)
-- Структурированный вывод (Structured Output)
-- Docker контейнеризация
-- Деплой на VPS
+[![Java](https://img.shields.io/badge/Java-17%2B-blue.svg)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring AI](https://img.shields.io/badge/Spring%20AI-0.8.1-orange.svg)](https://spring.io/projects/spring-ai)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 
 ---
 
-## Архитектура приложения
+## 📋 О проекте
+
+REST API приложение для чата с использованием **Spring AI** и **Ollama**. Выполнено в рамках практического задания по специализации Spring AI.
+
+### Основные возможности:
+- ✅ Интеграция LLM в Spring Boot
+- ✅ Работа с ChatClient
+- ✅ Промпт-инжиниринг (PromptTemplate)
+- ✅ Структурированный вывод (Structured Output)
+- ✅ Docker контейнеризация
+- ✅ Деплой на VPS
+
+---
+
+## 🏗️ Архитектура приложения
 
 ```mermaid
 graph TB
@@ -58,7 +62,7 @@ graph TB
 
 
 
-Технологии
+🔧 Технологии
 Компонент	Технология	Версия
 Язык	Java	17+
 Фреймворк	Spring Boot	3.2.0
@@ -67,7 +71,7 @@ LLM	Ollama	latest
 Модель	llama3.2:1b	-
 Контейнеризация	Docker	latest
 Сборка	Maven	3.9+
-Запуск
+🚀 Запуск
 Локально
 bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
@@ -77,7 +81,7 @@ mvn spring-boot:run
 Через Docker
 bash
 docker compose up -d --build
-API
+📡 API
 Health Check
 text
 GET /api/health
@@ -86,13 +90,11 @@ text
 POST /api/chat
 Content-Type: application/json
 Запрос:
-
 json
 {
   "message": "How to create REST API with Spring Boot?"
 }
 Ответ:
-
 json
 {
   "reply": "Summary: Для создания REST API на Spring Boot нужно выполнить несколько шагов...",
@@ -107,16 +109,15 @@ json
   }
 }
 Пример:
-
 bash
 curl -X POST http://194.154.27.141:8082/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "How to create REST API with Spring Boot?"}'
-Деплой
+🌐 Деплой
 Приложение развернуто на VPS:
 
-Health: http://194.154.27.141:8082/api/health
-
+Сервис	URL
+Health Check	http://194.154.27.141:8082/api/health
 ✅ Критерии приемки
 ☑ Приложение запускается
 ☑ Эндпоинт /api/chat отвечает

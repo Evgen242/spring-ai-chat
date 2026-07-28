@@ -6,39 +6,33 @@ REST API application built with Spring Boot and Spring AI for interacting with L
 
 ## Overview
 
-This project demonstrates the integration of Artificial Intelligence capabilities into a Java backend application using Spring AI.
+This project demonstrates the integration of Spring AI into a Spring Boot application.
 
-The application provides a REST API that receives user messages, builds AI prompts, communicates with an LLM through Ollama, converts the generated response into a structured Java object, and returns the result in JSON format.
+The service accepts user requests through a REST API, generates prompts using `PromptTemplate`, sends them to an LLM using `ChatClient`, converts the response into a structured Java object, and returns the result as JSON.
 
-The project demonstrates practical usage of:
-
-- Spring AI ChatClient
-- PromptTemplate
-- Structured Output
-- LLM integration
-- Docker-based deployment
+The project was developed as a practical demonstration of integrating modern AI capabilities into a Java backend application.
 
 ---
 
 ## Features
 
-- Spring Boot REST API
+- RESTful API built with Spring Boot
 - Spring AI integration
 - ChatClient API
-- PromptTemplate-based prompt generation
-- Structured response mapping
-- Ollama LLM integration
-- JSON request/response handling
+- PromptTemplate support
+- Structured Output mapping
+- Ollama integration
+- JSON request/response processing
 - Docker containerization
 - Docker Compose deployment
 - Linux VPS deployment
 
 ---
 
-# Technology Stack
+## Technology Stack
 
 | Component | Version |
-|-----------|---------|
+|-----------|----------|
 | Java | 17 |
 | Spring Boot | 3.2.x |
 | Spring AI | 0.8.x |
@@ -46,61 +40,64 @@ The project demonstrates practical usage of:
 | Ollama | Latest |
 | LLM Model | llama3.2:1b |
 | Docker | Latest |
-| Docker Compose | Latest |
 
 ---
 
-# Architecture
+## Architecture
 
-```mermaid
-flowchart LR
-
-    Client[Client Application]
-
-    Controller[ChatController]
-    Service[ChatService]
-
-    Prompt[PromptTemplate]
-    ChatClient[Spring AI ChatClient]
-
-    LLM[Ollama<br/>llama3.2:1b]
-
-    Parser[Structured Output Mapping]
-
-    Response[JSON Response]
-
-
-    Client --> Controller
-    Controller --> Service
-    Service --> Prompt
-    Prompt --> ChatClient
-    ChatClient --> LLM
-    LLM --> Parser
-    Parser --> Response
-    Response --> Client
+```
+                +----------------+
+                |     Client     |
+                +-------+--------+
+                        |
+                        v
+              +-------------------+
+              |  ChatController   |
+              +---------+---------+
+                        |
+                        v
+              +-------------------+
+              |    ChatService    |
+              +---------+---------+
+                        |
+          +-------------+-------------+
+          |                           |
+          v                           v
+  PromptTemplate              ChatClient
+          |                           |
+          +-------------+-------------+
+                        |
+                        v
+                 Ollama (LLM)
+                        |
+                        v
+              ParsedResponse Model
+                        |
+                        v
+                 JSON Response
 ```
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```
 spring-ai-chat/
-
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   ├── config
-│   │   │   ├── controller
-│   │   │   ├── model
-│   │   │   ├── service
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   ├── config/
+│   │   │   ├── controller/
+│   │   │   ├── model/
+│   │   │   ├── service/
 │   │   │   └── SpringAiChatApplication.java
 │   │   │
-│   │   └── resources
+│   │   └── resources/
 │   │       ├── application.yml
-│   │       └── prompts
+│   │       └── prompts/
 │   │
-│   └── test
+│   └── test/
 │
 ├── Dockerfile
 ├── docker-compose.yml
@@ -110,9 +107,9 @@ spring-ai-chat/
 
 ---
 
-# Getting Started
+## Getting Started
 
-## Clone Repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
@@ -122,7 +119,7 @@ cd spring-ai-chat
 
 ---
 
-## Build Application
+### Build the project
 
 ```bash
 mvn clean package
@@ -130,39 +127,33 @@ mvn clean package
 
 ---
 
-## Run Locally
+### Run locally
 
 ```bash
 mvn spring-boot:run
 ```
 
-Application starts on the configured server port.
+The application will start on the configured port.
 
 ---
 
-## Run with Docker
+### Run with Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-Check running containers:
-
-```bash
-docker ps
-```
-
 ---
 
-# REST API
+## REST API
 
-## Health Check
+### Health Check
 
 ```
 GET /api/health
 ```
 
-Response:
+Response
 
 ```
 OK
@@ -170,19 +161,14 @@ OK
 
 ---
 
-## Chat API
+### Chat Endpoint
 
 ```
 POST /api/chat
+Content-Type: application/json
 ```
 
-Content-Type:
-
-```
-application/json
-```
-
-Request:
+Request
 
 ```json
 {
@@ -190,16 +176,16 @@ Request:
 }
 ```
 
-Response:
+Response
 
 ```json
 {
-  "reply": "Summary: To create REST API with Spring Boot...",
+  "reply": "Summary: To create a REST API with Spring Boot...",
   "parsedInfo": {
-    "summary": "Creating REST API using Spring Boot",
+    "summary": "To create a REST API with Spring Boot...",
     "recommendations": [
       "Use Spring Initializr",
-      "Add Spring Web dependency"
+      "Add spring-boot-starter-web dependency"
     ],
     "difficulty": "MEDIUM",
     "technologies": [
@@ -213,7 +199,7 @@ Response:
 
 ---
 
-# Example Request
+## Example Request
 
 ```bash
 curl -X POST http://localhost:8082/api/chat \
@@ -223,128 +209,97 @@ curl -X POST http://localhost:8082/api/chat \
 
 ---
 
-# Request Processing Flow
-
-```mermaid
-sequenceDiagram
-
-    participant Client
-    participant Controller as ChatController
-    participant Service as ChatService
-    participant AI as Spring AI ChatClient
-    participant LLM as Ollama LLM
-
-    Client->>Controller: POST /api/chat
-
-    Controller->>Service: Process user request
-
-    Service->>Service: Build PromptTemplate
-
-    Service->>AI: Send prompt
-
-    AI->>LLM: Generate response
-
-    LLM-->>AI: AI generated content
-
-    AI-->>Service: Structured response
-
-    Service-->>Controller: ChatResponse
-
-    Controller-->>Client: JSON response
-```
-
----
-
-# Deployment
+## Deployment
 
 The application is deployed on a Linux VPS using Docker Compose.
 
 Deployment includes:
 
-- Containerized Spring Boot application
 - Docker Compose orchestration
+- Containerized Spring Boot application
 - Environment-based configuration
-- Application health monitoring
-- Production deployment workflow
+- Health monitoring
+- Production-ready deployment
 
 ---
 
-# Requirements
+## Request Processing Flow
 
-Before running the application:
+```
+HTTP Request
+      │
+      ▼
+ChatController
+      │
+      ▼
+ChatService
+      │
+      ├── Build Prompt
+      ├── Send Request
+      ▼
+ChatClient
+      │
+      ▼
+Ollama (LLM)
+      │
+      ▼
+AI Response
+      │
+      ▼
+Structured Output Mapping
+      │
+      ▼
+JSON Response
+```
 
-- Java 17+
+---
+
+## Build Requirements
+
+- Java 17 or newer
 - Maven 3.9+
-- Docker
+- Docker 24+
 - Docker Compose
 - Ollama
 - llama3.2:1b model
 
 ---
 
-# Configuration
+## Requirements Covered
 
-Application configuration is managed through:
-
-```
-src/main/resources/application.yml
-```
-
-Example configuration:
-
-```yaml
-spring:
-  application:
-    name: spring-ai-chat
-
-  ai:
-    ollama:
-      base-url: http://localhost:11434
-      chat:
-        options:
-          model: llama3.2:1b
-```
+- Spring Boot REST API
+- Spring AI integration
+- ChatClient implementation
+- PromptTemplate usage
+- Structured Output mapping
+- Ollama integration
+- Docker containerization
+- Docker Compose deployment
+- Linux VPS deployment
 
 ---
 
-# Project Requirements Completed
-
-- ✅ Spring Boot REST API
-- ✅ Spring AI integration
-- ✅ ChatClient implementation
-- ✅ PromptTemplate usage
-- ✅ System prompt configuration
-- ✅ Structured Output mapping
-- ✅ Ollama LLM integration
-- ✅ Docker containerization
-- ✅ Docker Compose deployment
-- ✅ VPS deployment
-
----
-
-# Future Improvements
+## Future Improvements
 
 - Authentication and authorization
-- Conversation history storage
-- PostgreSQL integration
-- Streaming AI responses
+- Conversation history
+- Streaming responses
 - Multiple LLM providers
+- Unit and integration tests
 - OpenAPI / Swagger documentation
-- Automated testing
-- CI/CD pipeline with GitHub Actions
+- CI/CD with GitHub Actions
 - Kubernetes deployment
 
 ---
 
-# Author
+## Author
 
 **Evgen242**
 
-GitHub:
-https://github.com/Evgen242
+GitHub: https://github.com/Evgen242
 
 ---
 
-# License
+## License
 
-MIT License
+This project is licensed under the MIT License.

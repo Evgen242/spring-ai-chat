@@ -21,7 +21,7 @@ public class ChatController {
         if (request == null || request.message() == null || request.message().trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         System.out.println("Received: " + request.message());
         AiChatResponse response = chatService.processMessage(request.message());
         return ResponseEntity.ok(response);

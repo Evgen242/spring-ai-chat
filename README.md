@@ -38,32 +38,26 @@ graph TB
     subgraph "Внешние сервисы"
         Model[Ollama llama3.2]
     end
-```
 📂 Структура проекта
-graph LR
-    root[spring-ai-chat/]
-    root --> src[src/]
-    root --> docker[Dockerfile]
-    root --> compose[docker-compose.yml]
-    root --> pom[pom.xml]
-    root --> readme[README.md]
-    
-    src --> main[main/]
-    main --> java[java/]
-    main --> resources[resources/]
-    
-    java --> app[com.example.springai/]
-    app --> controller[controller/]
-    app --> service[service/]
-    app --> model[model/]
-    
-    controller --> ChatController[ChatController.java]
-    service --> ChatService[ChatService.java]
-    model --> ChatRequest[ChatRequest.java]
-    model --> AiChatResponse[AiChatResponse.java]
-    model --> ParsedResponse[ParsedResponse.java]
-    
-    resources --> appyml[application.yml]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Технологии
 Компонент	Технология	Версия
 Язык	Java	17+
@@ -73,7 +67,7 @@ LLM	Ollama	latest
 Модель	llama3.2:1b	-
 Контейнеризация	Docker	latest
 Сборка	Maven	3.9+
-   Запуск
+Запуск
 Локально
 bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
@@ -83,7 +77,7 @@ mvn spring-boot:run
 Через Docker
 bash
 docker compose up -d --build
-   API
+API
 Health Check
 text
 GET /api/health
@@ -118,7 +112,7 @@ bash
 curl -X POST http://194.154.27.141:8082/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "How to create REST API with Spring Boot?"}'
-   Деплой
+Деплой
 Приложение развернуто на VPS:
 
 Health: http://194.154.27.141:8082/api/health
@@ -131,4 +125,10 @@ Health: http://194.154.27.141:8082/api/health
 ☑ Системный промпт с ролью
 ☑ Docker контейнеризация
 ☑ Деплой на VPS
+👨‍💻 Автор
+Evgen242
 
+GitHub: Evgen242
+
+📄 Лицензия
+MIT

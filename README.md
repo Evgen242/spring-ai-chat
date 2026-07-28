@@ -1,135 +1,229 @@
-# 🚀 Spring AI Chat Application
+# Spring AI Chat Application
 
-> Spring Boot приложение с интеграцией LLM через Spring AI
-
-[![Java](https://img.shields.io/badge/Java-17%2B-blue.svg)](https://adoptium.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring AI](https://img.shields.io/badge/Spring%20AI-0.8.1-orange.svg)](https://spring.io/projects/spring-ai)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+REST API application built with Spring Boot and Spring AI for interacting with Large Language Models (LLM) through Ollama.
 
 ---
 
-## 📋 О проекте
+## Overview
 
-REST API приложение для чата с использованием **Spring AI** и **Ollama**. Выполнено в рамках практического задания по специализации Spring AI.
+This project demonstrates the integration of Spring AI into a Spring Boot application.
 
-### Основные возможности:
-- ✅ Интеграция LLM в Spring Boot
-- ✅ Работа с ChatClient
-- ✅ Промпт-инжиниринг (PromptTemplate)
-- ✅ Структурированный вывод (Structured Output)
-- ✅ Docker контейнеризация
-- ✅ Деплой на VPS
+The service accepts user requests through a REST API, generates prompts using `PromptTemplate`, sends them to an LLM via `ChatClient`, converts the response into a structured Java object, and returns the result as JSON.
 
 ---
 
-## 🏗️ Архитектура приложения
+## Features
 
-```mermaid
-graph TB
-    Client[Клиент] -->|POST /api/chat| Controller[ChatController]
-    Controller -->|Обработка| Service[ChatService]
-    Service -->|PromptTemplate| Model[LLM модель]
-    Service -->|Парсинг| Parser[ParsedResponse]
-    Controller -->|JSON| Client
-    
-    subgraph "Spring Boot"
-        Controller
-        Service
-        Parser
-    end
-    
-    subgraph "Внешние сервисы"
-        Model[Ollama llama3.2]
-    end
-📂 Структура проекта
+- Spring Boot REST API
+- Spring AI integration
+- ChatClient API
+- PromptTemplate support
+- Structured Output mapping
+- Ollama integration
+- Docker support
+- Docker Compose deployment
+- VPS deployment
 
+---
 
+## Technology Stack
 
+| Component | Version |
+|-----------|----------|
+| Java | 17 |
+| Spring Boot | 3.2.x |
+| Spring AI | 0.8.x |
+| Maven | 3.9+ |
+| Ollama | Latest |
+| Docker | Latest |
 
+---
 
+## Architecture
 
+```
+Client
+   │
+   ▼
+ChatController
+   │
+   ▼
+ChatService
+   │
+   ├── PromptTemplate
+   ├── ChatClient
+   ▼
+Ollama (LLM)
+   │
+   ▼
+ParsedResponse
+   │
+   ▼
+JSON Response
+```
 
+---
 
+## Project Structure
 
+```
+src
+├── main
+│   ├── java
+│   │   ├── controller
+│   │   ├── service
+│   │   ├── model
+│   │   ├── config
+│   │   └── exception
+│   └── resources
+│       └── application.yml
+│
+├── Dockerfile
+├── docker-compose.yml
+├── pom.xml
+└── README.md
+```
 
+---
 
+## Getting Started
 
+### Clone the repository
 
-
-
-
-
-
-
-🔧 Технологии
-Компонент	Технология	Версия
-Язык	Java	17+
-Фреймворк	Spring Boot	3.2.0
-AI	Spring AI	0.8.1
-LLM	Ollama	latest
-Модель	llama3.2:1b	-
-Контейнеризация	Docker	latest
-Сборка	Maven	3.9+
-🚀 Запуск
-Локально
-bash
+```bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
 cd spring-ai-chat
-mvn clean install
+```
+
+### Build
+
+```bash
+mvn clean package
+```
+
+### Run locally
+
+```bash
 mvn spring-boot:run
-Через Docker
-bash
+```
+
+### Run with Docker
+
+```bash
 docker compose up -d --build
-📡 API
-Health Check
-text
+```
+
+---
+
+## REST API
+
+### Health Check
+
+```
 GET /api/health
-Chat
-text
+```
+
+Response
+
+```
+OK
+```
+
+---
+
+### Chat Endpoint
+
+```
 POST /api/chat
 Content-Type: application/json
-Запрос:
-json
+```
+
+Request
+
+```json
 {
   "message": "How to create REST API with Spring Boot?"
 }
-Ответ:
-json
+```
+
+Response
+
+```json
 {
-  "reply": "Summary: Для создания REST API на Spring Boot нужно выполнить несколько шагов...",
+  "reply": "Summary: ...",
   "parsedInfo": {
-    "summary": "Для создания REST API на Spring Boot нужно выполнить несколько шагов.",
+    "summary": "...",
     "recommendations": [
-      "Начните с Spring Initializr",
-      "добавьте зависимость spring-boot-starter-web"
+      "...",
+      "..."
     ],
     "difficulty": "MEDIUM",
-    "technologies": ["Java", "Spring Boot", "Spring Web"]
+    "technologies": [
+      "Java",
+      "Spring Boot",
+      "Spring Web"
+    ]
   }
 }
-Пример:
-bash
+```
+
+---
+
+## Example Request
+
+```bash
 curl -X POST http://194.154.27.141:8082/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "How to create REST API with Spring Boot?"}'
-🌐 Деплой
-Приложение развернуто на VPS:
+-H "Content-Type: application/json" \
+-d '{"message":"How to create REST API with Spring Boot?"}'
+```
 
-Сервис	URL
-Health Check	http://194.154.27.141:8082/api/health
-✅ Критерии приемки
-☑ Приложение запускается
-☑ Эндпоинт /api/chat отвечает
-☑ PromptTemplate с 2+ переменными
-☑ Структурированный вывод в Java-объект
-☑ Системный промпт с ролью
-☑ Docker контейнеризация
-☑ Деплой на VPS
-👨‍💻 Автор
-Evgen242
+---
 
-GitHub: Evgen242
+## Deployment
 
-📄 Лицензия
-MIT
+The application is deployed on a Linux VPS using Docker Compose.
+
+| Service | URL |
+|----------|-----|
+| Health Check | http://194.154.27.141:8082/api/health |
+| Chat API | http://194.154.27.141:8082/api/chat |
+
+---
+
+## Project Workflow
+
+1. Client sends a POST request.
+2. Controller receives the request.
+3. Service builds a prompt using `PromptTemplate`.
+4. `ChatClient` sends the prompt to Ollama.
+5. The model generates a response.
+6. The response is mapped to a Java object.
+7. The API returns structured JSON.
+
+---
+
+## Requirements Covered
+
+- Spring Boot REST API
+- Spring AI integration
+- PromptTemplate
+- ChatClient
+- Structured Output
+- Ollama LLM
+- Docker containerization
+- Docker Compose
+- VPS deployment
+
+---
+
+## Author
+
+**Evgen242**
+
+GitHub: https://github.com/Evgen242
+
+---
+
+## License
+
+MIT License

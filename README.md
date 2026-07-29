@@ -101,26 +101,23 @@ flowchart TD
     Parser --> Response
     Response --> Client
 ```
-Project Structure
-text
+# Project Structure
+
+```text
 spring-ai-chat/
-│
+
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   │   ├── controller/
-│   │   │   │   └── ChatController.java
 │   │   │   ├── model/
-│   │   │   │   ├── ChatRequest.java
-│   │   │   │   ├── AiChatResponse.java
-│   │   │   │   └── ParsedResponse.java
 │   │   │   ├── service/
-│   │   │   │   └── ChatService.java
 │   │   │   ├── config/
 │   │   │   └── SpringAiApplication.java
 │   │   │
 │   │   └── resources/
-│   │       └── application.yml
+│   │       ├── application.yml
+│   │       └── prompts/
 │   │
 │   └── test/
 │
@@ -128,47 +125,93 @@ spring-ai-chat/
 ├── docker-compose.yml
 ├── pom.xml
 └── README.md
-Getting Started
-Clone Repository
-bash
+```
+
+---
+
+# Getting Started
+
+## Clone Repository
+
+```bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
+
 cd spring-ai-chat
-Build
-bash
+```
+
+---
+
+## Build
+
+```bash
 mvn clean package
-Run Locally
-bash
+```
+
+---
+
+## Run Locally
+
+```bash
 mvn spring-boot:run
-Run with Docker
-bash
+```
+
+---
+
+## Run with Docker
+
+```bash
 docker compose up -d --build
+```
+
 Verify containers:
 
-bash
+```bash
 docker ps
-REST API
-Health Check
-text
+```
+
+---
+
+# REST API
+
+## Health Check
+
+```
 GET /api/health
-Response:
+```
 
-text
+Response
+
+```
 OK
-Chat Endpoint
-text
-POST /api/chat
-Content-Type: application/json
-Request:
+```
 
-json
+---
+
+## Chat Endpoint
+
+```
+POST /api/chat
+```
+
+Content-Type
+
+```
+application/json
+```
+
+Example request
+
+```json
 {
   "message": "How to create REST API with Spring Boot?"
 }
-Response:
+```
 
-json
+Example response
+
+```json
 {
-  "reply": "Summary: Creating REST API with Spring Boot...",
+  "reply": "Summary: To create a REST API with Spring Boot...",
   "parsedInfo": {
     "summary": "Creating REST API using Spring Boot",
     "recommendations": [
@@ -183,151 +226,185 @@ json
     ]
   }
 }
-Example Request
-bash
-curl -X POST http://194.154.27.141:8082/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message":"How to create REST API with Spring Boot?"}'
-AI Response Format
+```
+
+---
+
+# Example Request
+
+```bash
+curl -X POST http://localhost:8082/api/chat \
+-H "Content-Type: application/json" \
+-d '{"message":"How to create REST API with Spring Boot?"}'
+```
+
+---
+
+# AI Response Format
+
 Each successful request returns a structured response containing:
 
-Summary – brief overview of the answer
-
-Recommendations – list of practical recommendations
-
-Difficulty – EASY / MEDIUM / HARD
-
-Technologies – relevant technologies and tools
+- Summary
+- Recommendations
+- Difficulty level
+- Related technologies
 
 Example:
 
-json
+```json
 {
-  "summary": "Creating REST API with Spring Boot...",
+  "summary": "...",
   "recommendations": [
-    "Start with Spring Initializr",
-    "Add spring-boot-starter-web dependency"
+    "...",
+    "..."
   ],
   "difficulty": "MEDIUM",
   "technologies": [
-    "Java",
     "Spring Boot",
-    "Spring Web"
+    "Docker"
   ]
 }
-Request Processing Flow
-Validation
+```
+
+---
+
+# Request Processing Flow
+
+```mermaid
+sequenceDiagram
+
+    participant Client
+    participant Controller as ChatController
+    participant Service as ChatService
+    participant AI as Spring AI ChatClient
+    participant API as OpenRouter API
+    participant LLM as Large Language Model
+
+    Client->>Controller: POST /api/chat
+
+    Controller->>Service: Process request
+
+    Service->>Service: Build PromptTemplate
+
+    Service->>AI: Send prompt
+
+    AI->>API: Chat Completion Request
+
+    API->>LLM: Generate response
+
+    LLM-->>API: Generated content
+
+    API-->>AI: AI response
+
+    AI-->>Service: Structured Output
+
+    Service-->>Controller: ChatResponse
+
+    Controller-->>Client: JSON Response
+```
+
+---
+
+# Validation
+
 The application was validated using a comprehensive functional test suite.
 
-Metric	Result
-Test Cases	15
-Passed	15
-Failed	0
-Success Rate	100%
-Validated scenarios:
+| Metric | Result |
+|--------|--------|
+| Test Cases | 15 |
+| Passed | 15 |
+| Failed | 0 |
+| Success Rate | **100%** |
 
-Spring Boot REST API
+Validated scenarios include:
 
-Docker
-
-Python
-
-CI/CD
-
-Microservices
-
-Kubernetes
-
-Git
-
-Database Selection
-
-REST API Security
-
-GraphQL vs REST
-
-Unit Testing
-
-Caching
-
-Asynchronous Programming
-
-Cloud Platforms
-
-Java Interview Preparation
+- Spring Boot REST API
+- Docker
+- Python
+- CI/CD
+- Microservices
+- Kubernetes
+- Git
+- Database Selection
+- REST API Security
+- GraphQL vs REST
+- Unit Testing
+- Caching
+- Asynchronous Programming
+- Cloud Platforms
+- Java Interview Preparation
 
 Each successful response contained:
 
-✅ Summary
+- Summary
+- Recommendations
+- Difficulty
+- Technologies
 
-✅ Recommendations
+---
 
-✅ Difficulty
+# Project Requirements
 
-✅ Technologies
+| Requirement | Status |
+|------------|--------|
+| Spring Boot REST API | ✅ |
+| Chat endpoint | ✅ |
+| PromptTemplate with multiple variables | ✅ |
+| System prompt configuration | ✅ |
+| Structured Output mapping | ✅ |
+| Real LLM integration | ✅ |
+| Docker containerization | ✅ |
+| Linux VPS deployment | ✅ |
+| GitHub repository | ✅ |
 
-Project Requirements
-Requirement	Status
-Spring Boot REST API	✅
-Chat endpoint /api/chat	✅
-PromptTemplate with 2+ variables	✅
-System prompt configuration	✅
-Structured Output mapping	✅
-Real LLM integration (OpenRouter)	✅
-Docker containerization	✅
-Linux VPS deployment	✅
-GitHub repository	✅
-Deployment
+---
+
+# Deployment
+
 The application is deployed on a Linux VPS using Docker Compose.
-
-Health Check: http://194.154.27.141:8082/api/health
 
 Deployment includes:
 
-Docker Compose orchestration
+- Docker Compose orchestration
+- Containerized Spring Boot application
+- Environment-based configuration
+- Health monitoring
+- Production-ready deployment
 
-Containerized Spring Boot application
+---
 
-Environment-based configuration
+# Build Requirements
 
-Health monitoring
+- Java 17+
+- Maven 3.9+
+- Docker
+- Docker Compose
+- OpenRouter API key
 
-Production-ready deployment
+---
 
-Build Requirements
-Java 17+
+# Future Improvements
 
-Maven 3.9+
+- User authentication
+- Conversation history
+- Streaming responses
+- Multiple LLM providers
+- PostgreSQL persistence
+- Swagger / OpenAPI
+- Unit and integration testing
+- GitHub Actions CI/CD
+- Kubernetes deployment
 
-Docker (optional)
+---
 
-Docker Compose (optional)
+# Author
 
-OpenRouter API key
+**Evgen242**
 
-Future Improvements
-User authentication
+GitHub: https://github.com/Evgen242/spring-ai-chat
 
-Conversation history
+---
 
-Streaming responses
+# License
 
-Multiple LLM providers
-
-PostgreSQL persistence
-
-Swagger / OpenAPI documentation
-
-Unit and integration testing
-
-GitHub Actions CI/CD
-
-Kubernetes deployment
-
-Author
-Evgen242
-
-GitHub: https://github.com/Evgen242
-
-License
 This project is licensed under the MIT License.

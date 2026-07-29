@@ -1,55 +1,34 @@
 # Spring AI Chat Application
 
-REST API application built with Spring Boot and Spring AI for interacting with Large Language Models (LLM) through Ollama.
+REST API application built with Spring Boot and Spring AI for interacting with Large Language Models (LLMs) through the OpenRouter API.
 
 ---
 
-# Live Demo
-
-The application is deployed on a Linux VPS.
-
-| Service | Status |
-|---------|--------|
-| Health Check | Available |
-
-Health endpoint:
-
-```
-GET /api/health
-```
-
-Response:
-
-```
-OK
-```
-
----
-
-# Overview
+## Overview
 
 This project demonstrates the integration of Artificial Intelligence capabilities into a Java backend application using Spring AI.
 
-The application receives user requests through a REST API, creates prompts using `PromptTemplate`, sends requests to an LLM through `ChatClient`, converts the generated response into a structured Java object, and returns the result as JSON.
+The application accepts user requests through a REST API, builds prompts using `PromptTemplate`, sends requests through Spring AI `ChatClient` to the **OpenRouter API**, which automatically routes requests to an available free Large Language Model using the `openrouter/free` route. The generated response is then converted into a structured Java object and returned as JSON.
 
 The project demonstrates practical usage of:
 
-- Spring AI
-- LLM integration
-- Prompt engineering
-- Structured output processing
-- Containerized deployment
+- Spring AI ChatClient
+- Prompt engineering with PromptTemplate
+- Structured Output mapping
+- OpenRouter API integration
+- Docker-based deployment
+- Production-ready REST API architecture
 
 ---
 
-# Features
+## Features
 
 - REST API built with Spring Boot
 - Spring AI integration
+- OpenRouter LLM integration
 - ChatClient API
 - PromptTemplate support
 - Structured Output mapping
-- Ollama LLM integration
 - JSON request/response processing
 - Docker containerization
 - Docker Compose deployment
@@ -57,7 +36,7 @@ The project demonstrates practical usage of:
 
 ---
 
-# Technology Stack
+## Technology Stack
 
 | Component | Version |
 |-----------|---------|
@@ -65,71 +44,67 @@ The project demonstrates practical usage of:
 | Spring Boot | 3.2.x |
 | Spring AI | 0.8.x |
 | Maven | 3.9+ |
-| Ollama | Latest |
-| LLM Model | llama3.2:1b |
+| OpenRouter API | Latest |
+| LLM Route | openrouter/free |
 | Docker | Latest |
 | Docker Compose | Latest |
 
 ---
 
-# Architecture
+## LLM Provider
 
-```mermaid
-flowchart TD
+The application integrates with the **OpenRouter API** using the `openrouter/free` route.
 
-    Client[Client Application]
+Unlike a fixed model, `openrouter/free` automatically selects an available free Large Language Model, allowing the application to work without being tied to a specific provider while maintaining compatibility with the Spring AI ChatClient API.
 
-    subgraph SpringBoot["Spring Boot Application"]
+**Benefits:**
 
-        Controller[ChatController]
-
-        Service[ChatService]
-
-        Prompt[PromptTemplate]
-
-        AI[Spring AI ChatClient]
-
-        Parser[Structured Output Mapping]
-
-    end
-
-
-    subgraph External["External Services"]
-
-        Ollama[Ollama<br/>llama3.2:1b]
-
-    end
-
-
-    Response[JSON Response]
-
-
-    Client -->|HTTP Request| Controller
-
-    Controller --> Service
-
-    Service --> Prompt
-
-    Prompt --> AI
-
-    AI -->|Generate Request| Ollama
-
-    Ollama -->|AI Response| AI
-
-    AI --> Parser
-
-    Parser --> Response
-
-    Response --> Client
-```
+- Automatic selection of an available free model
+- No vendor lock-in
+- OpenAI-compatible API
+- Easy migration to commercial models if needed
 
 ---
 
-# Project Structure
+## Architecture
 
+```mermaid
+flowchart TD
+    Client[Client Application]
+
+    subgraph SpringBoot["Spring Boot Application"]
+        Controller[ChatController]
+        Service[ChatService]
+        Prompt[PromptTemplate]
+        AI[Spring AI ChatClient]
+        Parser[Structured Output Mapping]
+    end
+
+    subgraph OpenRouter["OpenRouter API"]
+        Router[openrouter/free Router]
+        LLM[Large Language Model]
+    end
+
+    Response[JSON Response]
+
+    Client -->|HTTP Request| Controller
+    Controller --> Service
+    Service --> Prompt
+    Prompt --> AI
+    AI --> OpenRouter
+    OpenRouter --> Router
+    Router --> LLM
+    LLM --> Router
+    Router --> OpenRouter
+    OpenRouter --> AI
+    AI --> Parser
+    Parser --> Response
+    Response --> Client
 ```
+Project Structure
+text
 spring-ai-chat/
-
+│
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -141,6 +116,7 @@ spring-ai-chat/
 │   │   │   │   └── ParsedResponse.java
 │   │   │   ├── service/
 │   │   │   │   └── ChatService.java
+│   │   │   ├── config/
 │   │   │   └── SpringAiApplication.java
 │   │   │
 │   │   └── resources/
@@ -152,95 +128,47 @@ spring-ai-chat/
 ├── docker-compose.yml
 ├── pom.xml
 └── README.md
-```
-
----
-
-# Getting Started
-
-## Clone Repository
-
-```bash
+Getting Started
+Clone Repository
+bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
-
 cd spring-ai-chat
-```
-
----
-
-## Build Application
-
-```bash
+Build
+bash
 mvn clean package
-```
-
----
-
-## Run Locally
-
-```bash
+Run Locally
+bash
 mvn spring-boot:run
-```
-
-Application starts on the configured port.
-
----
-
-## Run with Docker
-
-```bash
+Run with Docker
+bash
 docker compose up -d --build
-```
+Verify containers:
 
-Check containers:
-
-```bash
+bash
 docker ps
-```
-
----
-
-# REST API
-
-## Health Check
-
-```
+REST API
+Health Check
+text
 GET /api/health
-```
-
 Response:
 
-```
+text
 OK
-```
-
----
-
-## Chat Endpoint
-
-```
+Chat Endpoint
+text
 POST /api/chat
-```
-
-Content-Type:
-
-```
-application/json
-```
-
+Content-Type: application/json
 Request:
 
-```json
+json
 {
   "message": "How to create REST API with Spring Boot?"
 }
-```
-
 Response:
 
-```json
+json
 {
-  "reply": "Summary: To create a REST API with Spring Boot...",
+  "reply": "Summary: Creating REST API with Spring Boot...",
   "parsedInfo": {
     "summary": "Creating REST API using Spring Boot",
     "recommendations": [
@@ -255,114 +183,151 @@ Response:
     ]
   }
 }
-```
+Example Request
+bash
+curl -X POST http://194.154.27.141:8082/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"How to create REST API with Spring Boot?"}'
+AI Response Format
+Each successful request returns a structured response containing:
 
----
+Summary – brief overview of the answer
 
-# Example Request
+Recommendations – list of practical recommendations
 
-```bash
-curl -X POST http://localhost:8082/api/chat \
--H "Content-Type: application/json" \
--d '{"message":"How to create REST API with Spring Boot?"}'
-```
+Difficulty – EASY / MEDIUM / HARD
 
----
+Technologies – relevant technologies and tools
 
-# Deployment
+Example:
 
+json
+{
+  "summary": "Creating REST API with Spring Boot...",
+  "recommendations": [
+    "Start with Spring Initializr",
+    "Add spring-boot-starter-web dependency"
+  ],
+  "difficulty": "MEDIUM",
+  "technologies": [
+    "Java",
+    "Spring Boot",
+    "Spring Web"
+  ]
+}
+Request Processing Flow
+Validation
+The application was validated using a comprehensive functional test suite.
+
+Metric	Result
+Test Cases	15
+Passed	15
+Failed	0
+Success Rate	100%
+Validated scenarios:
+
+Spring Boot REST API
+
+Docker
+
+Python
+
+CI/CD
+
+Microservices
+
+Kubernetes
+
+Git
+
+Database Selection
+
+REST API Security
+
+GraphQL vs REST
+
+Unit Testing
+
+Caching
+
+Asynchronous Programming
+
+Cloud Platforms
+
+Java Interview Preparation
+
+Each successful response contained:
+
+✅ Summary
+
+✅ Recommendations
+
+✅ Difficulty
+
+✅ Technologies
+
+Project Requirements
+Requirement	Status
+Spring Boot REST API	✅
+Chat endpoint /api/chat	✅
+PromptTemplate with 2+ variables	✅
+System prompt configuration	✅
+Structured Output mapping	✅
+Real LLM integration (OpenRouter)	✅
+Docker containerization	✅
+Linux VPS deployment	✅
+GitHub repository	✅
+Deployment
 The application is deployed on a Linux VPS using Docker Compose.
+
+Health Check: http://194.154.27.141:8082/api/health
 
 Deployment includes:
 
-- Docker Compose orchestration
-- Containerized Spring Boot application
-- Environment-based configuration
-- Health monitoring
-- Production deployment workflow
+Docker Compose orchestration
 
----
+Containerized Spring Boot application
 
-# Request Processing Flow
+Environment-based configuration
 
-```mermaid
-sequenceDiagram
+Health monitoring
 
-    participant Client
-    participant Controller as ChatController
-    participant Service as ChatService
-    participant AI as Spring AI ChatClient
-    participant LLM as Ollama LLM
+Production-ready deployment
 
-    Client->>Controller: POST /api/chat
+Build Requirements
+Java 17+
 
-    Controller->>Service: Process request
+Maven 3.9+
 
-    Service->>Service: Build PromptTemplate
+Docker (optional)
 
-    Service->>AI: Send prompt
+Docker Compose (optional)
 
-    AI->>LLM: Generate response
+OpenRouter API key
 
-    LLM-->>AI: AI response
+Future Improvements
+User authentication
 
-    AI-->>Service: Structured output
+Conversation history
 
-    Service-->>Controller: ChatResponse
+Streaming responses
 
-    Controller-->>Client: JSON Response
-```
+Multiple LLM providers
 
----
+PostgreSQL persistence
 
-# Build Requirements
+Swagger / OpenAPI documentation
 
-- Java 17+
-- Maven 3.9+
-- Docker 24+
-- Docker Compose
-- Ollama
-- llama3.2:1b model
+Unit and integration testing
 
----
+GitHub Actions CI/CD
 
-# Implemented Features
+Kubernetes deployment
 
-- ✅ Spring Boot REST API
-- ✅ Spring AI integration
-- ✅ ChatClient implementation
-- ✅ PromptTemplate usage
-- ✅ Structured Output mapping
-- ✅ Ollama LLM integration
-- ✅ Docker containerization
-- ✅ Docker Compose deployment
-- ✅ Linux VPS deployment
+Author
+Evgen242
 
----
+GitHub: https://github.com/Evgen242
 
-# Future Improvements
-
-- Authentication and authorization
-- Conversation history storage
-- PostgreSQL integration
-- Streaming responses
-- Multiple LLM providers
-- Swagger / OpenAPI documentation
-- Unit and integration testing
-- CI/CD pipeline with GitHub Actions
-- Kubernetes deployment
-
----
-
-# Author
-
-**Evgen242**
-
-GitHub:
-https://github.com/Evgen242
-
----
-
-# License
-
-MIT License
+License
+This project is licensed under the MIT License.

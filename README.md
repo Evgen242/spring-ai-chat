@@ -245,7 +245,7 @@ Example response
 ```bash
 curl -X POST http://localhost:8082/api/chat \
 -H "Content-Type: application/json" \
--d '{"message":"How to create REST API with Spring Boot?"}'
+-d '{"message":"How to set up CI/CD?"}' | jq '.'
 ```
 
 ---

@@ -2,6 +2,12 @@
 
 REST API application built with Spring Boot and Spring AI for interacting with Large Language Models (LLMs) through the OpenRouter API.
 
+[![Java](https://img.shields.io/badge/Java-17%2B-blue.svg)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-API-orange.svg)](https://openrouter.ai)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 ---
 
 ## Overview
@@ -110,14 +116,18 @@ spring-ai-chat/
 │   ├── main/
 │   │   ├── java/
 │   │   │   ├── controller/
+│   │   │   │   └── ChatController.java
 │   │   │   ├── model/
+│   │   │   │   ├── ChatRequest.java
+│   │   │   │   ├── AiChatResponse.java
+│   │   │   │   └── ParsedResponse.java
 │   │   │   ├── service/
+│   │   │   │   └── ChatService.java
 │   │   │   ├── config/
 │   │   │   └── SpringAiApplication.java
 │   │   │
 │   │   └── resources/
-│   │       ├── application.yml
-│   │       └── prompts/
+│   │       └── application.yml
 │   │
 │   └── test/
 │
@@ -359,6 +369,13 @@ Each successful response contained:
 
 ---
 
+# Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENROUTER_API_KEY` | OpenRouter API key for LLM access | Yes |
+| `SERVER_PORT` | Application port (default: 8080) | No |
+
 # Deployment
 
 The application is deployed on a Linux VPS using Docker Compose.
@@ -377,8 +394,8 @@ Deployment includes:
 
 - Java 17+
 - Maven 3.9+
-- Docker
-- Docker Compose
+- Docker (optional)
+- Docker Compose (optional)
 - OpenRouter API key
 
 ---

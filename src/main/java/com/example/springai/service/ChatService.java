@@ -29,30 +29,46 @@ public class ChatService {
 
     public AiChatResponse processMessage(String userMessage) {
         try {
+            // 1. УЛУЧШЕННЫЙ СИСТЕМНЫЙ ПРОМПТ
             String systemPrompt = """
                     Ты - опытный IT-консультант с 10-летним стажем.
-                    Твоя задача - помогать пользователям с техническими вопросами.
-                    Отвечай структурированно и профессионально на РУССКОМ языке.
+                    
+                    Твоя задача - давать четкие, структурированные ответы.
+                    
+                    ВАЖНО: Всегда отвечай строго в формате:
+                    
+                    Summary: краткое резюме на русском (1-2 предложения)
+                    
+                    Recommendations:
+                    1. Первая рекомендация
+                    2. Вторая рекомендация
+                    3. Третья рекомендация
+                    
+                    Difficulty: EASY/MEDIUM/HARD
+                    
+                    Technologies: технология1, технология2, технология3
+                    
+                    Правила:
+                    - Рекомендации должны быть пронумерованы
+                    - Каждая рекомендация начинается с глагола (используйте, настройте, внедрите)
+                    - Технологии перечислять через запятую
+                    - Ответ всегда на русском языке
                     """;
 
+            // 2. PromptTemplate с 2+ переменными
             String userPromptTemplate = """
                     Вопрос пользователя: {question}
                     
                     Контекст: пользователь интересуется областью {tech_area}
                     
-                    Пожалуйста, предоставь структурированный ответ в формате:
-                    Summary: краткое резюме на русском
-                    Recommendations: список рекомендаций через запятую на русском
-                    Difficulty: EASY/MEDIUM/HARD
-                    Technologies: список необходимых технологий через запятую
-                    
-                    Ответ должен быть на РУССКОМ языке.
+                    Ответь структурированно согласно формату выше.
                     """;
 
             String promptContent = userPromptTemplate
                 .replace("{question}", userMessage)
                 .replace("{tech_area}", determineTechArea(userMessage));
 
+            // 3. Запрос к OpenRouter
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + apiKey);
@@ -65,7 +81,7 @@ public class ChatService {
                     Map.of("role", "system", "content", systemPrompt),
                     Map.of("role", "user", "content", promptContent)
                 ),
-                "temperature", 0.7
+                "temperature", 0.3  // Уменьшаем температуру для более стабильных ответов
             );
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
@@ -141,7 +157,10 @@ public class ChatService {
     private List<String> extractList(String text, String key, String fallbackKey) {
         String value = extractValue(text, key, fallbackKey);
         if (value.isEmpty()) return List.of();
-        return Arrays.stream(value.split("[,;]"))
+        
+        // Разделяем по запятым или точкам с запятой
+        String[] items = value.split("[,;]");
+        return Arrays.stream(items)
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .toList();

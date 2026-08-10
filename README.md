@@ -249,9 +249,9 @@ curl -X POST http://localhost:8082/api/chat \
 ```
 ---
 ```bash
- "Создать файл с более конкретным вопросом"
+#Создать файл с более конкретным вопросом"
 echo '{"message":"как выбрать мощный ПК для игр и программирования?"}' > request.json
-curl -X POST http://194.154.27.141:8082/api/chat \
+curl -X POST http://localhost:8082/api/chat \
   -H "Content-Type: application/json; charset=UTF-8" \
   -d @request.json | jq '.'
 ```

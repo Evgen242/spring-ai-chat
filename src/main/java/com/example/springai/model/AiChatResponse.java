@@ -4,5 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record AiChatResponse(
     @JsonProperty("reply") String reply,
-    @JsonProperty("parsedInfo") ParsedResponse parsedInfo
+    @JsonProperty("parsedInfo") ParsedResponse parsedInfo,
+    @JsonProperty("model") String model
 ) {}

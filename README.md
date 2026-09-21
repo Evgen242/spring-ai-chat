@@ -1,4 +1,3 @@
-
 # Spring AI Chat Application — Level 3
 
 REST API application built with Spring Boot and Spring AI for interacting with Large Language Models (LLMs) through the OpenRouter API, with Retrieval-Augmented Generation (RAG), vector search, structured responses, and Function Calling support.
@@ -168,13 +167,11 @@ flowchart TD
     SystemFunction --> ChatClient
 
     Controller --> Client
-```
-
+````
 ---
 
 ## Project Structure
-
-```text
+```
 spring-ai-chat/
 │
 ├── src/
@@ -182,43 +179,44 @@ spring-ai-chat/
 │   │   ├── java/
 │   │   │   ├── controller/
 │   │   │   │   ├── ChatController.java
-│   │   │   │   └── RagController.java
+│   │   │   │   └── RAGController.java
 │   │   │   │
 │   │   │   ├── model/
 │   │   │   │   ├── ChatRequest.java
 │   │   │   │   ├── AiChatResponse.java
-│   │   │   │   └── ParsedResponse.java
+│   │   │   │   ├── ParsedResponse.java
+│   │   │   │   ├── DocumentChunk.java
+│   │   │   │   ├── RAGRequest.java
+│   │   │   │   └── RAGResponse.java
 │   │   │   │
 │   │   │   ├── service/
 │   │   │   │   ├── ChatService.java
-│   │   │   │   ├── RagService.java
-│   │   │   │   └── EmbeddingService.java
+│   │   │   │   ├── RAGService.java
+│   │   │   │   ├── DocumentService.java
+│   │   │   │   ├── VectorStoreService.java
+│   │   │   │   └── FunctionCallingService.java
 │   │   │   │
 │   │   │   ├── config/
-│   │   │   │   └── SpringAiConfig.java
-│   │   │   │
-│   │   │   ├── function/
-│   │   │   │   ├── CurrentTimeFunction.java
-│   │   │   │   ├── SumFunction.java
-│   │   │   │   └── SystemInfoFunction.java
+│   │   │   │   ├── VectorStoreConfig.java
+│   │   │   │   └── SimpleEmbeddingConfig.java
 │   │   │   │
 │   │   │   └── SpringAiApplication.java
 │   │   │
 │   │   └── resources/
-│   │       ├── application.yml
+│   │       ├── application-docker.yml
 │   │       └── documents/
-│   │           └── knowledge.txt
+│   │           └── sample.txt
 │   │
 │   └── test/
+│       └── java/
+│           └── com/example/springai/service/
+│               └── RAGServiceTest.java
 │
 ├── Dockerfile
 ├── docker-compose.yml
 ├── pom.xml
 └── README.md
 ```
-
-> The exact package and file names may differ depending on the current implementation.
-
 ---
 
 # Getting Started
@@ -236,13 +234,11 @@ Before running the application, make sure the following tools are installed:
 ---
 
 ## Clone Repository
-
 ```bash
 git clone https://github.com/Evgen242/spring-ai-chat.git
 
 cd spring-ai-chat
 ```
-
 ---
 
 ## Configure Environment Variables
@@ -250,41 +246,31 @@ cd spring-ai-chat
 Set the OpenRouter API key before starting the application.
 
 ### Linux
-
 ```bash
 export OPENROUTER_API_KEY=your_api_key
 ```
-
 ### Windows PowerShell
-
 ```powershell
 $env:OPENROUTER_API_KEY="your_api_key"
 ```
-
 The API key should not be committed to the repository.
 
 ---
 
 ## Build
-
 ```bash
 mvn clean package
 ```
-
 To skip tests during packaging:
-
 ```bash
 mvn clean package -DskipTests
 ```
-
 ---
 
 ## Run Locally
-
 ```bash
 mvn spring-boot:run
 ```
-
 The application uses the port configured in `application.yml` or through the `SERVER_PORT` environment variable.
 
 ---
@@ -292,85 +278,62 @@ The application uses the port configured in `application.yml` or through the `SE
 ## Run with Docker
 
 Build and start the application:
-
 ```bash
 docker compose up -d --build
 ```
-
 Verify running containers:
-
 ```bash
 docker ps
 ```
-
 View application logs:
-
 ```bash
 docker compose logs -f
 ```
-
 Stop the application:
-
 ```bash
 docker compose down
 ```
-
 ---
 
 # REST API
 
 ## Health Check
-
 ```http
 GET /api/health
 ```
-
 Example request:
-
 ```bash
 curl http://localhost:8082/api/health
 ```
-
 Example response:
-
-```text
+```
 OK
 ```
-
 The health endpoint can be used to verify that the application is running and accessible.
 
 ---
 
 ## Chat Endpoint
-
 ```http
 POST /api/chat
 ```
-
 Content-Type:
-
 ```http
 application/json
 ```
-
 ### Request
-
 ```json
 {
   "message": "How to create REST API with Spring Boot?"
 }
 ```
-
 ### Example Request
-
 ```bash
 curl -X POST http://localhost:8082/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"How to set up CI/CD?"}' | jq '.'
 ```
-
 ### Example Response
-
 ```json
 {
   "reply": "Summary: To create a REST API with Spring Boot...",
@@ -389,45 +352,49 @@ curl -X POST http://localhost:8082/api/chat \
   }
 }
 ```
-
 ---
 
 ## RAG Endpoint
-
 ```http
 POST /api/rag
 ```
-
+Content-Type:
+```http
+application/json
+```
+### Request
+```json
+{
+  "message": "Что такое RAG?"
+}
+```
+### Example Request
+```bash
+echo '{"message":"Что такое RAG?"}' > request.json
+curl -X POST http://localhost:8082/api/rag \
+  -H "Content-Type: application/json; charset=UTF-8" \
+  -d @request.json | jq '.reply'
+```
+### Example Response
+```json
+{
+  "reply": "RAG (Retrieval-Augmented Generation) — это подход, при котором перед генерацией ответа модель получает релевантные документы из векторного хранилища.",
+  "sources": [
+    {
+      "id": "b864b850-0afb-4dca-8aad-74e04acd73ce",
+      "content": "RAG (Retrieval-Augmented Generation) — это подход...",
+      "source": "sample.txt",
+      "chunkIndex": 1
+    }
+  ],
+  "model": "z-ai/glm-5.2:free"
+}
+```
 The RAG endpoint extends a standard AI request by retrieving relevant information from the local document collection and adding it to the prompt before sending the request to the language model.
-
-The exact request structure depends on the implementation of `RagController` and the associated service.
 
 ### RAG Processing
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Controller as RagController
-    participant Service as RagService
-    participant Store as SimpleVectorStore
-    participant AI as Spring AI ChatClient
-    participant API as OpenRouter API
-    participant LLM as Large Language Model
-
-    Client->>Controller: POST /api/rag
-    Controller->>Service: Process user question
-    Service->>Store: Search relevant document chunks
-    Store-->>Service: Retrieved context
-    Service->>AI: Build prompt with context
-    AI->>API: Send augmented prompt
-    API->>LLM: Generate response
-    LLM-->>API: Generated response
-    API-->>AI: AI response
-    AI-->>Service: Process response
-    Service-->>Controller: RAG response
-    Controller-->>Client: JSON response
-```
-
+svg
 ---
 
 # Retrieval-Augmented Generation
@@ -451,42 +418,7 @@ Instead of relying only on the information contained in the model, the applicati
 
 ## RAG Pipeline
 
-```mermaid
-flowchart TD
-    Document[TXT Document]
-
-    Reader[Document Reader]
-    Splitter[Paragraph Splitter]
-    Embedding[Custom Hash-Based Embedding]
-    Store[SimpleVectorStore]
-
-    Question[User Question]
-    QueryEmbedding[Query Embedding]
-    Search[Similarity Search]
-    Context[Relevant Context]
-
-    Prompt[Augmented Prompt]
-    ChatClient[Spring AI ChatClient]
-    LLM[OpenRouter LLM]
-    Response[Generated Response]
-
-    Document --> Reader
-    Reader --> Splitter
-    Splitter --> Embedding
-    Embedding --> Store
-
-    Question --> QueryEmbedding
-    QueryEmbedding --> Search
-    Store --> Search
-    Search --> Context
-
-    Question --> Prompt
-    Context --> Prompt
-    Prompt --> ChatClient
-    ChatClient --> LLM
-    LLM --> Response
-```
-
+svg
 ---
 
 ## Vector Store
@@ -520,14 +452,14 @@ The custom embedding implementation should not be considered equivalent to a pro
 The RAG pipeline processes text documents through several stages:
 
 | Stage | Description |
-|-------|-------------|
-| Document Loading | Reads text from a resource file |
-| Text Splitting | Divides the document into paragraphs or smaller chunks |
-| Embedding | Converts text into numerical vectors |
-| Vector Storage | Stores vectors and associated document content |
-| Similarity Search | Finds relevant content for a user query |
-| Context Injection | Adds retrieved content to the AI prompt |
-| Response Generation | Generates an answer using the LLM |
+| -------------------- | ------------------------------------------------------ |
+| Document Loading     | Reads text from a resource file                        |
+| Text Splitting       | Divides the document into paragraphs or smaller chunks |
+| Embedding            | Converts text into numerical vectors                   |
+| Vector Storage       | Stores vectors and associated document content         |
+| Similarity Search    | Finds relevant content for a user query                |
+| Context Injection    | Adds retrieved content to the AI prompt                |
+| Response Generation  | Generates an answer using the LLM                      |
 
 ---
 
@@ -549,39 +481,28 @@ The project includes the following functions:
 
 ## Available Functions
 
-| Function | Description |
-|----------|-------------|
-| `getCurrentTime` | Returns the current system time |
-| `calculateSum` | Calculates the sum of two numeric values |
-| `getSystemInfo` | Returns system-related information |
+| Function | Description | Example Trigger |
+| ------------------------------ | ---------------------------------------- | --------------------------------------------- |
+| `getCurrentTime`               | Returns the current system time          | "Который час?", "Какое сегодня число?"        |
+| `calculateSum`                 | Calculates the sum of two numeric values | "Сколько будет 5 + 3?"                        |
+| `getSystemInfo`                | Returns system-related information       | "Какая у тебя система?", "На чём ты написан?" |
 
+### Example
+```bash
+echo '{"message":"Который час?"}' > request.json
+curl -s -X POST http://194.154.27.141:8082/api/rag \
+  -H "Content-Type: application/json; charset=UTF-8" \
+  -d @request.json | jq '.reply'
+```
+**Response:**
+```
+"Функция getCurrentTime вернула: Текущее время: 21.09.2026 11:51:27"
+```
 ---
 
 ## Function Calling Flow
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Controller
-    participant Service
-    participant AI as OpenRouter LLM
-    participant Function as Application Function
-
-    Client->>Controller: Send request
-    Controller->>Service: Process request
-    Service->>AI: Send prompt with available functions
-
-    AI-->>Service: Function call request
-    Service->>Function: Execute requested function
-    Function-->>Service: Return function result
-
-    Service->>AI: Send function result
-    AI-->>Service: Generate final response
-
-    Service-->>Controller: Return response
-    Controller-->>Client: JSON response
-```
-
+svg
 ---
 
 ## Function Calling Responsibilities
@@ -616,7 +537,6 @@ The response may include:
 - Related technologies
 
 Example:
-
 ```json
 {
   "summary": "Example summary",
@@ -632,7 +552,6 @@ Example:
   ]
 }
 ```
-
 The exact response fields depend on the DTO and structured output configuration used by the application.
 
 ---
@@ -641,59 +560,41 @@ The exact response fields depend on the DTO and structured output configuration 
 
 ## Standard Chat Flow
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Controller as ChatController
-    participant Service as ChatService
-    participant Prompt as PromptTemplate
-    participant AI as Spring AI ChatClient
-    participant API as OpenRouter API
-    participant LLM as Large Language Model
-
-    Client->>Controller: POST /api/chat
-    Controller->>Service: Process request
-    Service->>Prompt: Build prompt
-    Prompt-->>Service: Generated prompt
-    Service->>AI: Send prompt
-    AI->>API: Chat completion request
-    API->>LLM: Generate response
-    LLM-->>API: Generated content
-    API-->>AI: AI response
-    AI-->>Service: Structured output
-    Service-->>Controller: Chat response
-    Controller-->>Client: JSON response
-```
-
+svg
 ---
 
 # Configuration
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENROUTER_API_KEY` | OpenRouter API key for LLM access | Yes |
-| `SERVER_PORT` | Application port | No |
+| Variable | Description | Required |     |
+| ------------------------------- | --------------------------------- | --- |
+| `OPENROUTER_API_KEY`            | OpenRouter API key for LLM access | Yes |
+| `SERVER_PORT`                   | Application port                  | No  |
 
 The default application port is determined by the project configuration. The deployment examples use port `8082`.
 
 ---
 
 ## Example Configuration
-
 ```yaml
-server:
-  port: ${SERVER_PORT:8082}
+openrouter:
+  api-key: ${OPENROUTER_API_KEY}
 
 spring:
   ai:
     openai:
       api-key: ${OPENROUTER_API_KEY}
-      base-url: https://openrouter.ai/api
-```
+      base-url: https://openrouter.ai/api/v1
+      chat:
+        options:
+          model: openrouter/free
+          temperature: 0.7
 
-> The exact configuration keys must match the Spring AI version and the project's current `application.yml` implementation.
+server:
+  port: ${SERVER_PORT:8080}
+```
+> The exact configuration keys must match the Spring AI version and the project's current `application-docker.yml` implementation.
 
 ---
 
@@ -701,14 +602,40 @@ spring:
 
 The application includes automated tests and functional validation of the AI REST API.
 
-## Test Results
+## JUnit Tests (RAG & Function Calling)
 
 | Metric | Result |
-|--------|--------|
-| Functional Test Cases | 15 |
-| Passed | 15 |
-| Failed | 0 |
-| Success Rate | **100%** |
+| ---------------- | -------- |
+| Test Cases       | 2        |
+| Passed           | 2        |
+| Failed           | 0        |
+| Success Rate     | **100%** |
+
+**Tests:**
+
+- `testDocumentLoading()` — verifies document loading and chunk splitting
+- `testFunctionCalling()` — verifies `getCurrentTime`, `calculateSum`, `getSystemInfo`
+
+**Run tests:**
+```bash
+docker run --rm -v $(pwd):/app -w /app maven:3.9.6-eclipse-temurin-17-alpine mvn test
+```
+**Output:**
+```
+[INFO] Running com.example.springai.service.RAGServiceTest
+✅ Загружено 10 чанков из sample.txt
+✅ Загружено чанков: 10
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+## Functional Test Suite (Simple Chat)
+
+| **MetricResult**      |          |
+| --------------------- | -------- |
+| Functional Test Cases | 15       |
+| Passed                | 15       |
+| Failed                | 0        |
+| Success Rate          | **100%** |
 
 The test suite was used to validate the application's response processing across different technical topics.
 
@@ -742,27 +669,34 @@ Each successful response was expected to contain structured information, includi
 # Project Requirements
 
 | Requirement | Status |
-|------------|--------|
-| Spring Boot REST API | Implemented |
-| Chat endpoint | Implemented |
-| RAG endpoint | Implemented |
-| PromptTemplate support | Implemented |
-| Structured Output mapping | Implemented |
-| OpenRouter API integration | Implemented |
-| SimpleVectorStore integration | Implemented |
+| ------------------------------- | ----------- |
+| Spring Boot REST API            | Implemented |
+| Chat endpoint                   | Implemented |
+| RAG endpoint                    | Implemented |
+| PromptTemplate support          | Implemented |
+| Structured Output mapping       | Implemented |
+| OpenRouter API integration      | Implemented |
+| SimpleVectorStore integration   | Implemented |
 | Custom embedding implementation | Implemented |
-| TXT document processing | Implemented |
-| Function Calling | Implemented |
-| Docker containerization | Implemented |
-| Linux VPS deployment | Implemented |
-| Health check endpoint | Implemented |
-| GitHub repository | Available |
+| TXT document processing         | Implemented |
+| Function Calling                | Implemented |
+| JUnit tests                     | Implemented |
+| Docker containerization         | Implemented |
+| Linux VPS deployment            | Implemented |
+| Health check endpoint           | Implemented |
+| GitHub repository               | Available   |
 
 ---
 
 # Deployment
 
 The application is deployed on a Linux VPS using Docker Compose.
+
+## Live Demo
+
+- **Health Check:** [http://194.154.27.141:8082/api/health](http://194.154.27.141:8082/api/health)
+- **Chat Endpoint:** `POST http://194.154.27.141:8082/api/chat`
+- **RAG Endpoint:** `POST http://194.154.27.141:8082/api/rag`
 
 ## Deployment Includes
 
@@ -811,6 +745,7 @@ Before using the application in a production environment, consider implementing:
 
 # Future Improvements
 
+- Streaming responses (Flux)
 - User authentication and authorization
 - Conversation history
 - Persistent chat memory
@@ -819,7 +754,6 @@ Before using the application in a production environment, consider implementing:
 - Improved semantic embeddings
 - Support for additional document formats
 - File upload endpoint for RAG documents
-- Streaming AI responses
 - Multiple LLM providers
 - Swagger / OpenAPI documentation
 - Extended unit and integration tests
@@ -847,6 +781,7 @@ This project demonstrates the following development concepts:
 - Creating custom embeddings
 - Processing text documents
 - Implementing Function Calling
+- Writing JUnit tests for AI logic
 - Containerizing Java applications
 - Deploying applications to a Linux VPS
 - Validating AI functionality through functional tests
@@ -857,9 +792,7 @@ This project demonstrates the following development concepts:
 
 **Evgen242**
 
-GitHub:
-
-https://github.com/Evgen242/spring-ai-chat
+GitHub: https://github.com/Evgen242/spring-ai-chat
 
 ---
 

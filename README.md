@@ -394,7 +394,6 @@ The RAG endpoint extends a standard AI request by retrieving relevant informatio
 
 ### RAG Processing
 
-svg
 ---
 
 # Retrieval-Augmented Generation
@@ -418,7 +417,6 @@ Instead of relying only on the information contained in the model, the applicati
 
 ## RAG Pipeline
 
-svg
 ---
 
 ## Vector Store
@@ -490,7 +488,7 @@ The project includes the following functions:
 ### Example
 ```bash
 echo '{"message":"Который час?"}' > request.json
-curl -s -X POST http://194.154.27.141:8082/api/rag \
+curl -s -X POST http://localhost:8082/api/rag \
   -H "Content-Type: application/json; charset=UTF-8" \
   -d @request.json | jq '.reply'
 ```
@@ -502,7 +500,6 @@ curl -s -X POST http://194.154.27.141:8082/api/rag \
 
 ## Function Calling Flow
 
-svg
 ---
 
 ## Function Calling Responsibilities
@@ -560,7 +557,6 @@ The exact response fields depend on the DTO and structured output configuration 
 
 ## Standard Chat Flow
 
-svg
 ---
 
 # Configuration
@@ -694,9 +690,9 @@ The application is deployed on a Linux VPS using Docker Compose.
 
 ## Live Demo
 
-- **Health Check:** [http://194.154.27.141:8082/api/health](http://194.154.27.141:8082/api/health)
-- **Chat Endpoint:** `POST http://194.154.27.141:8082/api/chat`
-- **RAG Endpoint:** `POST http://194.154.27.141:8082/api/rag`
+- **Health Check:** [http://localhost:8082/api/health](http://localhost:8082/api/health)
+- **Chat Endpoint:** `POST http://localhost:8082/api/chat`
+- **RAG Endpoint:** `POST http://localhost:8082/api/rag`
 
 ## Deployment Includes
 

@@ -1,6 +1,16 @@
 openrouter:
   api-key: ${OPENROUTER_API_KEY}
 
+spring:
+  ai:
+    openai:
+      api-key: ${OPENROUTER_API_KEY}
+      base-url: https://openrouter.ai/api/v1
+      chat:
+        options:
+          model: openrouter/free
+          temperature: 0.7
+
 server:
   port: ${SERVER_PORT:8080}
 
@@ -8,3 +18,4 @@ logging:
   level:
     com.example: DEBUG
     org.springframework.web: DEBUG
+    org.springframework.ai: INFO

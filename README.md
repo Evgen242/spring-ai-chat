@@ -394,6 +394,29 @@ The RAG endpoint extends a standard AI request by retrieving relevant informatio
 
 ### RAG Processing
 
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as RAGController
+    participant Service as RAGService
+    participant Store as SimpleVectorStore
+    participant AI as Spring AI ChatClient
+    participant API as OpenRouter API
+    participant LLM as Large Language Model
+
+    Client->>Controller: POST /api/rag
+    Controller->>Service: Process user question
+    Service->>Store: Search relevant document chunks
+    Store-->>Service: Retrieved context
+    Service->>AI: Build prompt with context
+    AI->>API: Send augmented prompt
+    API->>LLM: Generate response
+    LLM-->>API: Generated response
+    API-->>AI: AI response
+    AI-->>Service: Process response
+    Service-->>Controller: RAG response
+    Controller-->>Client: JSON response
+```
 ---
 
 # Retrieval-Augmented Generation
@@ -416,6 +439,37 @@ Instead of relying only on the information contained in the model, the applicati
 ---
 
 ## RAG Pipeline
+
+```mermaid
+flowchart TD
+    Document[TXT Document]
+    Reader[Document Reader]
+    Splitter[Paragraph Splitter]
+    Embedding[Custom Hash-Based Embedding]
+    Store[SimpleVectorStore]
+    Question[User Question]
+    QueryEmbedding[Query Embedding]
+    Search[Similarity Search]
+    Context[Relevant Context]
+    Prompt[Augmented Prompt]
+    ChatClient[Spring AI ChatClient]
+    LLM[OpenRouter LLM]
+    Response[Generated Response]
+
+    Document --> Reader
+    Reader --> Splitter
+    Splitter --> Embedding
+    Embedding --> Store
+    Question --> QueryEmbedding
+    QueryEmbedding --> Search
+    Store --> Search
+    Search --> Context
+    Question --> Prompt
+    Context --> Prompt
+    Prompt --> ChatClient
+    ChatClient --> LLM
+    LLM --> Response
+```
 
 ---
 
@@ -500,6 +554,27 @@ curl -s -X POST http://localhost:8082/api/rag \
 
 ## Function Calling Flow
 
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Service
+    participant AI as OpenRouter LLM
+    participant Function as Application Function
+
+    Client->>Controller: Send request
+    Controller->>Service: Process request
+    Service->>AI: Send prompt with available functions
+    AI-->>Service: Function call request
+    Service->>Function: Execute requested function
+    Function-->>Service: Return function result
+    Service->>AI: Send function result
+    AI-->>Service: Generate final response
+    Service-->>Controller: Return response
+    Controller-->>Client: JSON response
+```
+
+
 ---
 
 ## Function Calling Responsibilities
@@ -556,6 +631,30 @@ The exact response fields depend on the DTO and structured output configuration 
 # Request Processing Flow
 
 ## Standard Chat Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as ChatController
+    participant Service as ChatService
+    participant Prompt as PromptTemplate
+    participant AI as Spring AI ChatClient
+    participant API as OpenRouter API
+    participant LLM as Large Language Model
+
+    Client->>Controller: POST /api/chat
+    Controller->>Service: Process request
+    Service->>Prompt: Build prompt
+    Prompt-->>Service: Generated prompt
+    Service->>AI: Send prompt
+    AI->>API: Chat completion request
+    API->>LLM: Generate response
+    LLM-->>API: Generated content
+    API-->>AI: AI response
+    AI-->>Service: Structured output
+    Service-->>Controller: Chat response
+    Controller-->>Client: JSON response
+```
 
 ---
 

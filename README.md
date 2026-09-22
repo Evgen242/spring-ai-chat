@@ -563,10 +563,10 @@ The exact response fields depend on the DTO and structured output configuration 
 
 ## Environment Variables
 
-| Variable | Description | Required |     |
-| ------------------------------- | --------------------------------- | --- |
-| `OPENROUTER_API_KEY`            | OpenRouter API key for LLM access | Yes |
-| `SERVER_PORT`                   | Application port                  | No  |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENROUTER_API_KEY` | OpenRouter API key for LLM access | Yes |
+| `SERVER_PORT` | Application port | No |
 
 The default application port is determined by the project configuration. The deployment examples use port `8082`.
 

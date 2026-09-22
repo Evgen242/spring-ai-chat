@@ -277,6 +277,16 @@ The application uses the port configured in `application.yml` or through the `SE
 
 ## Run with Docker
 
+---
+
+The application image is available on Docker Hub:
+
+```bash
+docker pull evgen1771/spring-ai-chat:level-3
+docker run -p 8082:8080 -e OPENROUTER_API_KEY="your_key" evgen1771/spring-ai-chat:level-3
+
+---
+
 Build and start the application:
 ```bash
 docker compose up -d --build

@@ -55,19 +55,31 @@ public class RAGService {
                 context.append("- ").append(doc.getContent()).append("\n\n");
             }
 
+            // 👈 ЧЁТКОЕ РАЗДЕЛЕНИЕ ПРАВИЛ
             String systemPrompt = String.format("""
-                    Ты - ИТ-консультант. Отвечай строго на основе контекста ниже.
-                    Если ответа нет в контексте — скажи об этом честно.
-                    Если пользователь спрашивает время, дату или сумму — используй доступные инструменты.
-
-                    КОНТЕКСТ:
+                    Ты - RAG-ассистент с доступом к функциям.
+                    
+                    ВАЖНО: Определи тип вопроса:
+                    
+                    ТИП 1 — ДЕЙСТВИЕ (время, сумма, система):
+                    - Если вопрос про время/дату → ВЫЗОВИ getCurrentTime
+                    - Если вопрос про сумму чисел → ВЫЗОВИ calculateSum
+                    - Если вопрос про систему/стек/приложение → ВЫЗОВИ getSystemInfo
+                    - НЕ отвечай текстом, а СРАЗУ вызывай функцию!
+                    
+                    ТИП 2 — ТЕХНИЧЕСКИЙ ВОПРОС (Spring AI, Docker, RAG, OpenRouter):
+                    - Отвечай ТОЛЬКО на основе КОНТЕКСТА ниже
+                    - Если ответа нет в контексте — скажи "В предоставленном контексте нет информации по этому вопросу"
+                    - НЕ используй свои знания о технологиях
+                    
+                    КОНТЕКСТ (только для ТИП 2):
                     %s
                     """, context.toString());
 
             String userPrompt = String.format("""
                     Вопрос пользователя: %s
 
-                    Ответь на вопрос на основе контекста выше.
+                    Определи тип вопроса и ответь соответствующим образом.
                     """, userQuery);
 
             HttpHeaders headers = new HttpHeaders();
@@ -81,7 +93,7 @@ public class RAGService {
                     "type", "function",
                     "function", Map.of(
                         "name", "getCurrentTime",
-                        "description", "Получить текущее время и дату",
+                        "description", "Получить текущее время и дату. ОБЯЗАТЕЛЬНО вызывай, если пользователь спрашивает 'который час', 'какое сегодня число', 'текущее время'",
                         "parameters", Map.of("type", "object", "properties", Map.of())
                     )
                 ),
@@ -89,7 +101,7 @@ public class RAGService {
                     "type", "function",
                     "function", Map.of(
                         "name", "calculateSum",
-                        "description", "Вычислить сумму двух чисел",
+                        "description", "Вычислить сумму двух чисел. ОБЯЗАТЕЛЬНО вызывай, если пользователь просит 'сложи', 'сколько будет', 'сумма чисел'",
                         "parameters", Map.of(
                             "type", "object",
                             "properties", Map.of(
@@ -104,7 +116,7 @@ public class RAGService {
                     "type", "function",
                     "function", Map.of(
                         "name", "getSystemInfo",
-                        "description", "Получить информацию о системе: приложение, язык программирования, фреймворк, версия, стек технологий. Используй, если пользователь спрашивает 'какая у тебя система', 'что ты используешь', 'твой стек', 'информация о приложении', 'на чём ты написан'",
+                        "description", "Получить информацию о системе: приложение, язык, фреймворк, версия. ОБЯЗАТЕЛЬНО вызывай, если пользователь спрашивает 'какая у тебя система', 'что ты используешь', 'твой стек'",
                         "parameters", Map.of("type", "object", "properties", Map.of())
                     )
                 )
@@ -118,7 +130,7 @@ public class RAGService {
                 ),
                 "tools", tools,
                 "tool_choice", "auto",
-                "temperature", 0.3
+                "temperature", 0.1
             );
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
@@ -140,7 +152,6 @@ public class RAGService {
                 String arguments = toolCall.path("function").path("arguments").asText();
 
                 System.out.println("🔧 Модель вызвала функцию: " + functionName);
-                System.out.println("   Аргументы: " + arguments);
 
                 String functionResult = executeFunction(functionName, arguments);
                 content = "Функция " + functionName + " вернула: " + functionResult;

@@ -29,7 +29,7 @@ public class RAGService {
     private final FunctionCallingService functionCallingService;
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final int TOP_K = 7;
+    private static final int TOP_K = 15;
     private static final String MODEL = "nvidia/nemotron-3.5-lightning:free";
 
     public RAGService(VectorStoreService vectorStoreService,
@@ -65,11 +65,14 @@ public class RAGService {
 
                     Шаг 1. Определи тип вопроса МЫСЛЕННО. Не пиши этот шаг в ответе.
 
-                    ТИП 1 — ДЕЙСТВИЕ (время, сумма, система):
+                    ТИП 1 — ДЕЙСТВИЕ (время, арифметика, система):
                       - вопрос про время/дату → вызови getCurrentTime
-                      - вопрос про сумму чисел → вызови calculateSum
-                      - вопрос про систему/стек/приложение → вызови getSystemInfo
+                      - вопрос про арифметику (сложение, вычитание, умножение, деление,
+                        знаки + - * / × ÷, слова 'сложи', 'вычти', 'умножь', 'раздели',
+                        'посчитай', 'вычисли', 'сколько будет') → вызови calculate
+                      - вопрос про систему/стек/приложение/фреймворк/язык программирования → вызови getSystemInfo
                       - НЕ отвечай текстом, а СРАЗУ вызывай функцию!
+                      - НЕ выдумывай имена функций, используй ровно: getCurrentTime, calculate, getSystemInfo
 
                     ТИП 2 — ТЕХНИЧЕСКИЙ ВОПРОС (Spring AI, Docker, RAG, OpenRouter):
                       - отвечай ТОЛЬКО на основе КОНТЕКСТА ниже
@@ -113,22 +116,30 @@ public class RAGService {
                     "type", "function",
                     "function", Map.of(
                         "name", "getCurrentTime",
-                        "description", "Получить текущее время и дату. ОБЯЗАТЕЛЬНО вызывай, если пользователь спрашивает 'который час', 'какое сегодня число', 'текущее время'",
+                        "description", "Получить текущее время и дату. ОБЯЗАТЕЛЬНО вызывай, " +
+                                       "если пользователь спрашивает 'который час', 'сколько времени', " +
+                                       "'какое сегодня число', 'какая сегодня дата', 'текущее время', 'текущая дата'",
                         "parameters", Map.of("type", "object", "properties", Map.of())
                     )
                 ),
                 Map.of(
                     "type", "function",
                     "function", Map.of(
-                        "name", "calculateSum",
-                        "description", "Вычислить сумму двух чисел. ОБЯЗАТЕЛЬНО вызывай, если пользователь просит 'сложи', 'сколько будет', 'сумма чисел'",
+                        "name", "calculate",
+                        "description", "Выполняет ЛЮБЫЕ арифметические операции: сложение (+), " +
+                                       "вычитание (-), умножение (*), деление (/). " +
+                                       "ОБЯЗАТЕЛЬНО вызывай на 'сложи', 'вычти', 'умножь', 'раздели', " +
+                                       "'посчитай', 'вычисли', 'сколько будет' с любым из знаков + - * / × ÷. " +
+                                       "НЕ пытайся решить пример самостоятельно — всегда вызывай эту функцию.",
                         "parameters", Map.of(
                             "type", "object",
                             "properties", Map.of(
-                                "a", Map.of("type", "number", "description", "Первое число"),
-                                "b", Map.of("type", "number", "description", "Второе число")
+                                "expression", Map.of(
+                                    "type", "string",
+                                    "description", "Математическое выражение, например '7 * 6' или '5 + 3'"
+                                )
                             ),
-                            "required", List.of("a", "b")
+                            "required", List.of("expression")
                         )
                     )
                 ),
@@ -136,7 +147,10 @@ public class RAGService {
                     "type", "function",
                     "function", Map.of(
                         "name", "getSystemInfo",
-                        "description", "Получить информацию о системе. ОБЯЗАТЕЛЬНО вызывай, если пользователь спрашивает 'какая у тебя система', 'что ты используешь', 'твой стек'",
+                        "description", "Получить информацию о системе, стеке, языке программирования и фреймворке. " +
+                                       "ОБЯЗАТЕЛЬНО вызывай на 'какая у тебя система', 'что ты используешь', " +
+                                       "'твой стек', 'какой фреймворк', 'какой язык программирования', " +
+                                       "'на чём ты написан'",
                         "parameters", Map.of("type", "object", "properties", Map.of())
                     )
                 )
@@ -172,10 +186,21 @@ public class RAGService {
                 String functionName = toolCall.path("function").path("name").asText();
                 String arguments = toolCall.path("function").path("arguments").asText();
 
-                System.out.println(" Модель вызвала функцию: " + functionName + " args=" + arguments);
+                // Валидация имени функции: отсекаем галлюцинации вроде "..." или "example_function_name"
+                if (functionName == null || !functionName.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+                    System.out.println("⚠️ Некорректное имя функции: [" + functionName + "]");
+                    content = "Не удалось получить ответ. Попробуйте переформулировать вопрос.";
+                } else {
+                    System.out.println("🔧 Модель вызвала функцию: " + functionName + " args=" + arguments);
+                    String functionResult = executeFunction(functionName, arguments);
+                    content = "Функция " + functionName + " вернула: " + functionResult;
+                }
+            }
 
-                String functionResult = executeFunction(functionName, arguments);
-                content = "Функция " + functionName + " вернула: " + functionResult;
+            // Fallback: если content пустой — возвращаем понятную фразу
+            if (content == null || content.isBlank()) {
+                System.out.println("⚠️ Пустой ответ от модели");
+                content = "Не удалось получить ответ. Попробуйте переформулировать вопрос.";
             }
 
             List<DocumentChunk> sources = relevantDocs.stream()
@@ -202,17 +227,58 @@ public class RAGService {
             switch (name) {
                 case "getCurrentTime":
                     return functionCallingService.getCurrentTime();
+
+                case "calculate":
+                    String expression = args.path("expression").asText();
+                    if (expression == null || expression.isBlank()) {
+                        return "Ошибка: пустое выражение";
+                    }
+                    return String.valueOf(evalExpression(expression));
+
+                // Fallback совместимости: если модель вызовет старое имя calculateSum
                 case "calculateSum":
+                    if (args.has("expression")) {
+                        return String.valueOf(evalExpression(args.path("expression").asText()));
+                    }
                     double a = args.path("a").asDouble();
                     double b = args.path("b").asDouble();
                     return String.valueOf(functionCallingService.calculateSum(a, b));
+
                 case "getSystemInfo":
                     return functionCallingService.getSystemInfo();
+
                 default:
-                    return "Неизвестная функция: " + name;
+                    return "Функция не поддерживается: " + name;
             }
         } catch (Exception e) {
             return "Ошибка выполнения функции: " + e.getMessage();
         }
+    }
+
+    /**
+     * Простой парсер арифметических выражений: "a OP b".
+     * Поддерживает +, -, *, /, ×, ÷. Пробелы игнорируются.
+     */
+    private double evalExpression(String expr) {
+        String s = expr.trim()
+                .replace("×", "*")
+                .replace("÷", "/")
+                .replace(" ", "");
+
+        for (String op : new String[]{"+", "-", "*", "/"}) {
+            int idx = s.indexOf(op);
+            if (idx > 0) {
+                double a = Double.parseDouble(s.substring(0, idx));
+                double b = Double.parseDouble(s.substring(idx + 1));
+                return switch (op) {
+                    case "+" -> a + b;
+                    case "-" -> a - b;
+                    case "*" -> a * b;
+                    case "/" -> a / b;
+                    default -> throw new IllegalArgumentException("Неизвестный оператор: " + op);
+                };
+            }
+        }
+        throw new IllegalArgumentException("Не могу разобрать выражение: " + expr);
     }
 }

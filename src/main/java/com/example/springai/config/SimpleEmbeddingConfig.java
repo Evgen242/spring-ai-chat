@@ -14,6 +14,8 @@ import java.util.List;
 @Configuration
 public class SimpleEmbeddingConfig {
 
+    private static final int DIMENSIONS = 512;
+
     @Bean
     public EmbeddingClient embeddingClient() {
         return new EmbeddingClient() {
@@ -43,12 +45,52 @@ public class SimpleEmbeddingConfig {
         return result;
     }
 
+    /**
+     * Bag-of-words хеш-эмбеддинг.
+     * - Каждое слово даёт вклад в вектор (TF).
+     * - Хеш слова определяет, в какую размерность писать.
+     * - Нормализация L2 — чтобы косинусное сходство работало корректно.
+     */
     private float[] textToVector(String text) {
-        float[] vector = new float[384];
-        int hash = text.hashCode();
-        for (int i = 0; i < 384; i++) {
-            vector[i] = (float) Math.sin(hash * (i + 1) * 0.01);
+        float[] vector = new float[DIMENSIONS];
+
+        if (text == null || text.isBlank()) {
+            return vector;
         }
+
+        // Приводим к нижнему регистру и разбиваем на слова
+        String normalized = text.toLowerCase()
+                .replaceAll("[^a-zа-яё0-9\\-]", " ")
+                .trim();
+
+        String[] words = normalized.split("\\s+");
+
+        // TF: каждое слово увеличивает свою размерность
+        for (String word : words) {
+            if (word.length() < 2) continue;
+            int idx = Math.floorMod(word.hashCode(), DIMENSIONS);
+            vector[idx] += 1.0f;
+        }
+
+        // Дополнительно — биграммы (пары слов) для контекста
+        for (int i = 0; i < words.length - 1; i++) {
+            String bigram = words[i] + "_" + words[i + 1];
+            int idx = Math.floorMod(bigram.hashCode(), DIMENSIONS);
+            vector[idx] += 0.5f;
+        }
+
+        // L2-нормализация
+        double norm = 0;
+        for (float v : vector) {
+            norm += v * v;
+        }
+        norm = Math.sqrt(norm);
+        if (norm > 0) {
+            for (int i = 0; i < DIMENSIONS; i++) {
+                vector[i] /= (float) norm;
+            }
+        }
+
         return vector;
     }
 }

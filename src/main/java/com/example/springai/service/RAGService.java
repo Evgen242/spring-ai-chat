@@ -29,7 +29,7 @@ public class RAGService {
     private final FunctionCallingService functionCallingService;
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final int TOP_K = 15;
+    private static final int TOP_K = 10;
     private static final String MODEL = "nvidia/nemotron-3.5-lightning:free";
 
     public RAGService(VectorStoreService vectorStoreService,
@@ -49,7 +49,24 @@ public class RAGService {
 
     public RAGResponse processQuery(String userQuery) {
         try {
-            List<Document> relevantDocs = vectorStoreService.searchSimilar(userQuery, TOP_K);
+            // 1. Ищем точные совпадения по кодам (EMP-, SITE-, DEP-, PRJ-)
+            List<String> keywords = vectorStoreService.extractKeywords(userQuery);
+            List<Document> keywordDocs = new java.util.ArrayList<>();
+
+            for (String keyword : keywords) {
+                keywordDocs.addAll(vectorStoreService.keywordSearch(keyword, 3));
+            }
+
+            // 2. Если есть keyword-совпадения — используем их
+            List<Document> relevantDocs;
+            if (!keywordDocs.isEmpty()) {
+                System.out.println("🔑 Keyword-поиск: найдено " + keywordDocs.size()
+                        + " по кодам " + keywords);
+                relevantDocs = keywordDocs;
+            } else {
+                // 3. Иначе — векторный поиск
+                relevantDocs = vectorStoreService.searchSimilar(userQuery, TOP_K);
+            }
 
             StringBuilder context = new StringBuilder();
             for (Document doc : relevantDocs) {
@@ -74,9 +91,13 @@ public class RAGService {
                       - НЕ отвечай текстом, а СРАЗУ вызывай функцию!
                       - НЕ выдумывай имена функций, используй ровно: getCurrentTime, calculate, getSystemInfo
 
-                    ТИП 2 — ТЕХНИЧЕСКИЙ ВОПРОС (Spring AI, Docker, RAG, OpenRouter):
+                    ТИП 2 — ВОПРОС ПО КОНТЕКСТУ (Spring AI, Docker, RAG, сотрудники, площадки, подразделения):
                       - отвечай ТОЛЬКО на основе КОНТЕКСТА ниже
-                      - если ответа нет в контексте — ответь ровно фразой отказа
+                      - ВАЖНО: контекст содержит карточки сотрудников (EMP), паспорта площадок (SITE) и карточки подразделений (DEP)
+                      - Если вопрос про сотрудника (по имени или EMP-коду) — ОБЯЗАТЕЛЬНО найди его карточку в контексте и используй данные из неё (ФИО, подразделение, роль, грейд, почта, компетенция, маркер)
+                      - Если вопрос про подразделение (DEP-код) — найди карточку подразделения, перечисли сотрудников или функцию
+                      - Если вопрос про площадку (SITE-код) — найди паспорт площадки (название, населённый пункт, окно отправки, правило приёмки)
+                      - Если ответа нет в контексте — ответь ровно фразой отказа
                       - НЕ используй свои знания о технологиях
 
                     ═══════════════════════════════════════════════════════════

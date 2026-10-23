@@ -54,7 +54,7 @@ public class RAGService {
             List<Document> keywordDocs = new java.util.ArrayList<>();
 
             for (String keyword : keywords) {
-                keywordDocs.addAll(vectorStoreService.keywordSearch(keyword, 3));
+                keywordDocs.addAll(vectorStoreService.keywordSearch(keyword, 15));
             }
 
             // 2. Если есть keyword-совпадения — используем их

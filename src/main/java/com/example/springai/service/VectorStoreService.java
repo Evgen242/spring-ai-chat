@@ -81,6 +81,37 @@ public class VectorStoreService {
             keywords.add(matcher.group());
         }
 
+        // Поиск маркеров (10 символов A-Z0-9, например VXL2FL3KNH)
+        java.util.regex.Pattern markerPattern =
+            java.util.regex.Pattern.compile("[A-Z0-9]{10}");
+        java.util.regex.Matcher markerMatcher = markerPattern.matcher(query.toUpperCase());
+        while (markerMatcher.find()) {
+            keywords.add(markerMatcher.group());
+        }
+
+        // Если нет кодов — ищем имена (два слова с заглавной буквы)
+        if (keywords.isEmpty()) {
+            java.util.regex.Pattern namePattern =
+                java.util.regex.Pattern.compile("[А-ЯЁ][а-яё]+\\s+[А-ЯЁ][а-яё]+");
+            java.util.regex.Matcher nameMatcher = namePattern.matcher(query);
+            while (nameMatcher.find()) {
+                String fullName = nameMatcher.group();
+                keywords.add(fullName);
+                // Морфология: добавляем корень имени (без окончания)
+                // "Полевца" -> "Полевц", "Яровиной" -> "Яровин"
+                String[] parts = fullName.split("\\s+");
+                if (parts.length > 0) {
+                    String surname = parts[0];
+                    if (surname.length() > 4) {
+                        String stem = surname.substring(0, surname.length() - 2);
+                        if (!stem.isEmpty()) {
+                            keywords.add(stem);
+                        }
+                    }
+                }
+            }
+        }
+
         return keywords;
     }
 

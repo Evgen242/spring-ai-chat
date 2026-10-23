@@ -112,6 +112,16 @@ public class VectorStoreService {
             }
         }
 
+        // Если имён (два слова) нет — ищем одно слово с заглавной (фамилию)
+        if (keywords.isEmpty()) {
+            java.util.regex.Pattern singleNamePattern =
+                java.util.regex.Pattern.compile("[А-ЯЁ][а-яё]{3,}");
+            java.util.regex.Matcher singleNameMatcher = singleNamePattern.matcher(query);
+            while (singleNameMatcher.find()) {
+                keywords.add(singleNameMatcher.group());
+            }
+        }
+
         return keywords;
     }
 

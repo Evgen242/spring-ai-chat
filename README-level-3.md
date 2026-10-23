@@ -912,6 +912,132 @@ This project demonstrates practical experience with:
 - Deploying applications to a Linux VPS.
 - Validating AI response processing through functional tests.
 
+# Testing
+
+The application includes automated unit tests and functional validation of the Retrieval-Augmented Generation (RAG) pipeline.
+
+## JUnit Tests (RAG, Document Processing & API)
+
+| Metric | Result |
+| ---------------- | -------- |
+| Test Cases | 12 |
+| Passed | 12 |
+| Failed | 0 |
+| Success Rate | **100%** |
+
+**Test Classes:**
+
+- `RAGServiceTest` — verifies document loading and Function Calling
+- `DocumentServiceTest` — verifies chunk splitting, unique IDs, and non-empty chunks
+- `VectorStoreServiceTest` — verifies keyword search, morphological search, control markers, and edge cases
+- `ChatControllerTest` — verifies `/api/health` and `/api/rag` API validation
+
+**Run tests:**
+
+```bash
+docker run --rm -v $(pwd):/app -w /app maven:3.9.6-eclipse-temurin-17-alpine mvn test
+```
+
+**Output:**
+
+```text
+[INFO] Running com.example.springai.service.VectorStoreServiceTest
+[INFO] Indexed 468 chunks
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] Running com.example.springai.service.DocumentServiceTest
+[INFO] Chunks: 468
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] Running com.example.springai.service.RAGServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+## Functional Test Suite (RAG)
+
+| Metric | Result |
+| --------------------- | -------- |
+| Functional Test Cases | 15 |
+| Passed | 15 |
+| Failed | 0 |
+| Success Rate | **100%** |
+
+The functional test suite validates information retrieval, morphological search, structured data extraction, and handling of queries outside the available dataset.
+
+**Test Dataset:**
+
+| Metric | Value |
+| ---------------- | -------- |
+| Dataset | Nevarys |
+| Dataset Size | 650 KB |
+| Indexed Chunks | 468 |
+
+### Validated Scenarios
+
+**1. Data Aggregation**
+
+- Retrieving all employees assigned to site `SITE-04`
+- Listing employee IDs in department `DEP-10` (Financial Control)
+- Retrieving acceptance rules for site `SITE-07`
+- Identifying the function of department `DEP-11` (Personnel Training)
+- Finding sites with a shipping window of `09:30–15:30`
+
+**2. Exact Data Retrieval**
+
+- Retrieving an employee record by ID (`EMP-0222`)
+- Identifying an employee's grade using morphological search
+- Finding employees with the competency "Elma access verification"
+- Listing employees working as shift supervisors
+- Retrieving an employee's work email address
+
+**3. Edge Cases and Data Validation**
+
+- Handling unknown employee IDs (`EMP-9999`)
+- Handling unknown site IDs (`SITE-99`)
+- Rejecting questions unrelated to the dataset
+- Searching by a unique control marker
+- Retrieving employee records by registry inclusion date
+
+### Example: Morphological Search
+
+**Query:**
+
+> What do you know about Tarnova?
+
+**Validated Result:**
+
+The system retrieves the employee record, including:
+
+- Full name
+- Department and work site
+- Role and internal grade
+- Registry inclusion date
+- Work email and internal number
+- Verified competencies
+- Personal control marker
+
+**Validated Processing:**
+
+- **Morphological Search** — matches inflected surname forms to the corresponding employee record.
+- **Keyword Search** — retrieves the relevant document chunk.
+- **Structured Data Extraction** — generates a response containing the available employee details.
+- **Out-of-Scope Handling** — declines to provide unsupported information when the dataset contains no relevant answer.
+
+---
+
+## Test Summary
+
+| Test Suite | Test Cases | Passed | Success Rate |
+| ------------------------- | ----------: | ----------: | -----------: |
+| JUnit Tests | 12 | 12 | **100%** |
+| Functional RAG Tests | 15 | 15 | **100%** |
+| **Total** | **27** | **27** | **100%** |
+
+**Conclusion:** Automated and functional tests validate the application's document processing, chunking, keyword retrieval, morphological search, structured data extraction, API validation, and handling of unsupported queries.
+
 ## Обоснование размера тестового набора
 
 Для тестирования RAG-системы был выбран **фрагмент датасета «Неварис»** размером **650 КБ** (~500 чанков), а не полный файл **23 МБ** (~12 500 чанков). Это **осознанное инженерное решение**, связанное с архитектурными ограничениями текущего стенда, а не попытка скрыть проблемы.
@@ -943,6 +1069,8 @@ This project demonstrates practical experience with:
 ### Вывод
 
 **650 КБ** — **репрезентативная выборка**, которая **покрывает все типы вопросов** и **доказывает работоспособность** RAG-логики. **23 МБ** — **за пределами возможностей** текущего VPS (2 GB RAM), что **честно зафиксировано** в разделе «Ограничения».
+
+
 
 ## Author
 

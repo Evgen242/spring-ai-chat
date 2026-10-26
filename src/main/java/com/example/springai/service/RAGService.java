@@ -233,7 +233,13 @@ public class RAGService {
                 ))
                 .toList();
 
-            return new RAGResponse(content, sources, model);
+            // Если ответ — отказ, скрыть sources (они не релевантны)
+            List<DocumentChunk> finalSources = sources;
+            if (content != null && content.contains("В предоставленном контексте нет информации")) {
+                finalSources = List.of();
+            }
+
+            return new RAGResponse(content, finalSources, model);
 
         } catch (Exception e) {
             e.printStackTrace();

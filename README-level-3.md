@@ -814,6 +814,35 @@ The system retrieves the employee record, including:
 
 **Conclusion:** Automated and functional tests validate the application's document processing, chunking, keyword retrieval, morphological search, structured data extraction, API validation, and handling of unsupported queries.
 
+## API/HTTP Testing (Postman)
+
+Automated API/HTTP test suite executed via `postman/newman` in Docker.
+
+| Artifact | Path |
+|---|---|
+| Test cases (A1–A15) and results | [`qa/api-tests.md`](qa/api-tests.md) |
+| Bug reports (BUG-001…007) | [`qa/bug-reports.md`](qa/bug-reports.md) |
+| Test Summary Report | [`qa/summary.md`](qa/summary.md) |
+| Postman collection | [`qa/postman/spring-ai-chat.postman_collection.json`](qa/postman/spring-ai-chat.postman_collection.json) |
+| Newman summary (run report) | [`qa/postman/newman-summary.json`](qa/postman/newman-summary.json) |
+
+**Result:** 14/15 PASS (93.3%). A14 (5000-char request) → timeout, documented as **BUG-007** (Low/Low, edge case).
+
+**Run:**
+
+```bash
+docker run --rm \
+  -v $(pwd)/qa/postman:/etc/newman \
+  postman/newman run spring-ai-chat.postman_collection.json \
+  -e env.json \
+  --timeout-request 300000 \
+  --reporters cli,json \
+  --reporter-json-export /etc/newman/newman-report.json
+```
+
+Coverage: positive RAG (A1–A7), negative validation (A8–A13), long input (A14), special chars (A15).
+
+---
 ## Обоснование размера тестового набора
 
 Для тестирования RAG-системы был выбран **фрагмент датасета «Неварис»** размером **650 КБ** (~500 чанков), а не полный файл **23 МБ** (~12 500 чанков). Это **осознанное инженерное решение**, связанное с архитектурными ограничениями текущего стенда, а не попытка скрыть проблемы.

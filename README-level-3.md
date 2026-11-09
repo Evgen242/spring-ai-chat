@@ -820,6 +820,8 @@ Automated API/HTTP test suite executed via `postman/newman` in Docker.
 
 | Artifact | Path |
 |---|---|
+| Test Plan | [`qa/test-plan.md`](qa/test-plan.md) |
+| Test Design (4 techniques) | [`qa/test-design.md`](qa/test-design.md) |
 | Test cases (A1–A15) and results | [`qa/api-tests.md`](qa/api-tests.md) |
 | Bug reports (BUG-001…007) | [`qa/bug-reports.md`](qa/bug-reports.md) |
 | Test Summary Report | [`qa/summary.md`](qa/summary.md) |

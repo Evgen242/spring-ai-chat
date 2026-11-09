@@ -1,0 +1,569 @@
+{
+  "info": {
+    "name": "Spring AI Chat — RAG API (A1–A15)",
+    "description": "Базовое API/HTTP-тестирование RAG-сервиса. Позитивные A1–A7, негативные A8–A15.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "A1 — GET /api/health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A1: status 200', () => pm.response.to.have.status(200));",
+              "pm.test('A1: body = OK', () => pm.expect(pm.response.text().trim()).to.eql('OK'));",
+              "pm.test('A1: content-type text/plain', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A2 — POST /api/rag (EMP-0222)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A2: status 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('A2: reply содержит Полевец', () => pm.expect(b.reply).to.match(/Полевец/i));",
+              "pm.test('A2: sources непустой', () => pm.expect(b.sources.length).to.be.above(0));",
+              "pm.test('A2: model присутствует', () => pm.expect(b.model).to.be.a('string').and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Кто такой EMP-0222?\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A3 — POST /api/rag (SITE-04)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A3: status 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('A3: reply непустой', () => pm.expect(b.reply).to.be.a('string').and.not.empty);",
+              "pm.test('A3: sources непустой', () => pm.expect(b.sources.length).to.be.above(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Кто работает на SITE-04?\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A4 — POST /api/rag (Function: время)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A4: status 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('A4: reply содержит время', () => pm.expect(b.reply).to.match(/\\d{1,2}:\\d{2}|Текущее время/i));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Который час?\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A5 — POST /api/rag (Function: calculate)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A5: status 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('A5: reply содержит 5', () => pm.expect(b.reply).to.include('5'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Сколько будет 2 + 3?\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A6 — POST /api/rag (отказ, sources=[])",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A6: status 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('A6: reply — отказ', () => pm.expect(b.reply).to.match(/нет информации|не найден/i));",
+              "pm.test('A6: sources пустой (BUG-003 fixed)', () => pm.expect(b.sources.length).to.eql(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Как приготовить борщ?\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A7 — POST /api/rag (EMP-9999, граница)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A7: status 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('A7: reply — отказ', () => pm.expect(b.reply).to.match(/нет информации|не найден/i));",
+              "pm.test('A7: sources пустой', () => pm.expect(b.sources.length).to.eql(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Кто такой EMP-9999?\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A8 — POST /api/rag ({} без message) → 4xx",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A8: 4xx', () => pm.expect(pm.response.code).to.be.within(400, 499));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A9 — POST /api/rag (message=\"\")",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A9: 4xx или 200 с отказом', () => {",
+              "  const ok = (pm.response.code >= 400 && pm.response.code < 500) || pm.response.code === 200;",
+              "  pm.expect(ok).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A10 — POST /api/rag (невалидный JSON) → 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A10: 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "not-a-json"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A11 — POST /api/rag (message=null) → 4xx",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A11: 4xx', () => pm.expect(pm.response.code).to.be.within(400, 499));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":null}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A12 — POST /api/rag (Content-Type text/plain)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A12: 4xx', () => pm.expect(pm.response.code).to.be.within(400, 499));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/plain"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "Кто такой EMP-0222?"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A13 — GET /api/rag → 405",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A13: 405', () => pm.response.to.have.status(405));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A14 — POST /api/rag (5000 символов, pre-request)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.variables.set('longMessage', 'a'.repeat(5000));",
+              "pm.request.timeout = 300000;"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A14: сервер ответил (не timeout)', () => {",
+              "  pm.expect(pm.response.code).to.be.above(0);",
+              "});",
+              "pm.test('A14: 200 или 4xx', () => {",
+              "  const ok = pm.response.code === 200 || (pm.response.code >= 400 && pm.response.code < 500);",
+              "  pm.expect(ok).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"{{longMessage}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    },
+    {
+      "name": "A15 — POST /api/rag (спецсимволы)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('A15: 200', () => pm.response.to.have.status(200));",
+              "pm.test('A15: reply непустой', () => pm.expect(pm.response.json().reply).to.be.a('string').and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"message\":\"Тест 🚀 <>&test\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rag",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "rag"
+          ]
+        }
+      }
+    }
+  ]
+}

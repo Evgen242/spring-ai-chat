@@ -25,3 +25,6 @@ Thumbs.db
 # Docker
 OllamaSetup.exe
 request.json
+
+# QA — full newman log (large; summary is committed instead)
+qa/postman/newman-report.json

@@ -4,6 +4,7 @@
 
 | Artifact | Path |
 |---|---|
+| Runbook (how to reproduce) | `RUNBOOK.md` |
 | Test plan | `test-plan.md` |
 | Test design (4 techniques: EC, BV, DT, ST) | `test-design.md` |
 | API/HTTP tests (Postman A1-A15) | `api-tests.md` |

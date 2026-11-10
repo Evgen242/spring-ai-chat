@@ -42,7 +42,7 @@ docker run --rm \
 **Expected result:**
 
 ```text
-requests:    15  | failed: 1   (A14 ․ ESOCKETTIMEDOUT, expected ․ BUG-007)
+requests:    15  | failed: 1   (A14 → ESOCKETTIMEDOUT, expected → BUG-007)
 assertions:  30  | failed: 2   (both on A14)
 duration:    ~7 min
 ```
@@ -117,11 +117,11 @@ docker run --rm \
 
 ## What to compare after the run
 
-|`Source | Expected |
+| Source | Expected |
 |---|---|
 | newman CLI output | `requests: 15, failed: 1`; `assertions: 30, failed: 2` |
 | `qa/postman/newman-summary.json` | `requests {total:15, failed:1}`, `assertions {total:30, failed:2}` |
-| `qa/api-tests.md` (table Ay1–A15) | 14 PASS, 1 FAIL (A14 → BUG-007) |
+| `qa/api-tests.md` (table A1–A15) | 14 PASS, 1 FAIL (A14 → BUG-007) |
 | `qa/summary.md` → Results | 46/47 = 97.9% |
 
 All three sources must agree. If they do not — that is a **new defect** to report.
